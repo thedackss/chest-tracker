@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <!-- Cross-platform on purpose: the scan tool and tests run on Linux too. -->
+    <RootNamespace>ChestTracker</RootNamespace>
+    <AssemblyName>ChestTracker.Engine</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\lib\FortniteReplayReader\FortniteReplayReader.csproj" />
+  </ItemGroup>
+</Project>

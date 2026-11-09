@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>ChestTracker.Scan</RootNamespace>
+    <AssemblyName>chest-scan</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\ChestTracker.Engine\ChestTracker.Engine.csproj" />
+  </ItemGroup>
+</Project>

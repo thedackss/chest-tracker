@@ -72,4 +72,5 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release create "$GITHUB_REF_NAME" dist/ChestTracker.exe dist/ChestTracker.exe.sha256 \
-            --title "chest-tracker ${{ steps.version.outputs.version }}" --generate-notes --verify-tag
+            --title "chest-tracker ${{ steps.version.outputs.version }}" --generate-notes --verify-tag \
+            --notes "**Code signing policy:** free code signing provided by [SignPath.io](https://about.signpath.io), certificate by [SignPath Foundation](https://signpath.org). See the [code signing policy](https://github.com/thedackss/chest-tracker#code-signing-policy)."

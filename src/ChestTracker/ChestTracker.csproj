@@ -10,6 +10,8 @@
     <AssemblyName>ChestTracker</AssemblyName>
     <Version>0.1.0</Version>
     <Product>chest-tracker</Product>
+    <!-- ProductVersion = plain version (no "+commit"), which the signing policy checks. -->
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
     <ApplicationIcon>Assets\app.ico</ApplicationIcon>
     <!-- The replay parser discovers its types by reflection: never trim. -->
     <PublishTrimmed>false</PublishTrimmed>

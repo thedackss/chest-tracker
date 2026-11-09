@@ -12,7 +12,8 @@ It only reads `.replay` files. It does not touch the game, its memory or your Ep
 ## Use it
 
 1. In Fortnite: **Settings → Game → Replays → Record Replays: On**.
-2. Run `ChestTracker.exe`. Windows may say "Windows protected your PC" (the exe is not signed): **More info → Run anyway**.
+2. Download `ChestTracker.exe` from [Releases](https://github.com/thedackss/chest-tracker/releases) and run it.
+   If Windows says "Windows protected your PC" (unsigned or still-new exe): **More info → Run anyway**.
 3. On the welcome screen, type where your "Open treasure chests" quest is right now, so the counts start from there.
 4. Play. Each match is counted a few seconds after it ends.
 
@@ -24,6 +25,31 @@ For the overlay to show over the game, use **Windowed Fullscreen** (Settings →
 | Ctrl+Shift+L | lock / unlock the overlay (unlocked: drag it) |
 
 The tray icon menu has the report and the settings. Data lives in `%APPDATA%\chest-tracker`.
+
+## What it changes on your PC, and uninstalling
+
+There is no installer: the exe runs from wherever you put it.
+
+- It saves its settings, match history and report in `%APPDATA%\chest-tracker`.
+- With **Start with Windows** on (Settings), it adds a `chest-tracker` entry to
+  `HKCU\Software\Microsoft\Windows\CurrentVersion\Run`.
+
+To uninstall: turn off **Start with Windows** in Settings, **Quit** from the tray icon,
+then delete the exe and the `%APPDATA%\chest-tracker` folder.
+
+## Privacy
+
+This program will not transfer any information to other networked systems unless specifically requested by the user or the person installing or operating it.
+
+## Code signing policy
+
+Free code signing provided by [SignPath.io](https://about.signpath.io), certificate by [SignPath Foundation](https://signpath.org).
+
+- Committers and reviewers: [thedackss](https://github.com/thedackss)
+- Approvers: [thedackss](https://github.com/thedackss)
+
+Release exes are built from this repository by [GitHub Actions](.github/workflows/release.yml) and each signing is approved by hand.
+Changes from people outside the team (pull requests) are reviewed before they are merged.
 
 ## Build
 

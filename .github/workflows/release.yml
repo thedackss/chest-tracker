@@ -1,0 +1,75 @@
+# Builds ChestTracker.exe on a GitHub-hosted runner. A pushed tag vX.Y.Z also publishes a GitHub release.
+# Signing turns on once the SignPath repository variables and secret exist (see .signpath/README.md);
+# until then the release gets the unsigned exe.
+name: release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: version
+        id: version
+        run: |
+          if [[ "$GITHUB_REF_TYPE" == tag ]]; then
+            v="${GITHUB_REF_NAME#v}"
+          else
+            v="$(sed -n 's:.*<Version>\(.*\)</Version>.*:\1:p' src/ChestTracker/ChestTracker.csproj)"
+          fi
+          echo "version=$v" >> "$GITHUB_OUTPUT"
+
+      - name: build
+        run: ./publish.sh -p:Version=${{ steps.version.outputs.version }}
+
+      - name: upload unsigned exe
+        id: upload
+        uses: actions/upload-artifact@v7
+        with:
+          name: ChestTracker-unsigned
+          path: dist/ChestTracker.exe
+
+      - name: sign (SignPath)
+        if: vars.SIGNPATH_ORGANIZATION_ID != ''
+        uses: signpath/github-action-submit-signing-request@v3
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          project-slug: chest-tracker
+          signing-policy-slug: release-signing
+          artifact-configuration-slug: exe
+          github-artifact-id: ${{ steps.upload.outputs.artifact-id }}
+          wait-for-completion: true
+          # Each release is approved by hand on signpath.io.
+          wait-for-completion-timeout-in-seconds: 3600
+          output-artifact-directory: signed
+          parameters: |
+            version: "${{ steps.version.outputs.version }}"
+
+      - name: use signed exe
+        if: vars.SIGNPATH_ORGANIZATION_ID != ''
+        run: cp signed/ChestTracker.exe dist/ChestTracker.exe
+
+      - name: checksum
+        run: cd dist && sha256sum ChestTracker.exe > ChestTracker.exe.sha256 && cat ChestTracker.exe.sha256
+
+      - name: release
+        if: github.ref_type == 'tag'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" dist/ChestTracker.exe dist/ChestTracker.exe.sha256 \
+            --title "chest-tracker ${{ steps.version.outputs.version }}" --generate-notes --verify-tag

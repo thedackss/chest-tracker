@@ -73,6 +73,8 @@ public sealed class Settings
     public bool StartWithFortnite { get; set; }
 
     public bool ShowOverlay { get; set; } = true;
+    /// <summary>Hide the locked overlay while Fortnite is not running (unlocked it always shows, to be placed).</summary>
+    public bool OverlayOnlyInGame { get; set; } = true;
     public bool OverlayLocked { get; set; }
     public int? OverlayX { get; set; }
     public int? OverlayY { get; set; }

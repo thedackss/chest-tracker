@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <!-- Lets redhouse (Linux) build the Windows exe. -->
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
+    <RootNamespace>ChestTracker</RootNamespace>
+    <AssemblyName>ChestTracker</AssemblyName>
+    <Version>0.1.0</Version>
+    <Product>chest-tracker</Product>
+    <ApplicationIcon>Assets\app.ico</ApplicationIcon>
+    <!-- The replay parser discovers its types by reflection: never trim. -->
+    <PublishTrimmed>false</PublishTrimmed>
+    <ServerGarbageCollection>false</ServerGarbageCollection>
+    <ConcurrentGarbageCollection>false</ConcurrentGarbageCollection>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ChestTracker.Engine\ChestTracker.Engine.csproj" />
+    <EmbeddedResource Include="Assets\app.ico" LogicalName="app.ico" />
+  </ItemGroup>
+</Project>

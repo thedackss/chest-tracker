@@ -8,8 +8,16 @@ using L = ChestTracker.Text;
 
 namespace ChestTracker;
 
+/// <summary>Which rows the overlay shows under the total (Settings.OverlayShow*).</summary>
+public sealed record OverlayRows(bool Quest = true, bool Last = true, bool Session = true, bool Treasures = true)
+{
+    public static readonly OverlayRows All = new();
+
+    public static OverlayRows From(Settings s) => new(s.OverlayShowQuest, s.OverlayShowLast, s.OverlayShowSession, s.OverlayShowTreasures);
+}
+
 /// <summary>What the overlay shows.</summary>
-public sealed record OverlayState(Totals Totals, bool InMatch, bool Locked);
+public sealed record OverlayState(Totals Totals, bool InMatch, bool Locked, OverlayRows? Rows = null);
 
 /// <summary>
 /// Always-on-top HUD: outlined figures with per-pixel transparency (UpdateLayeredWindow), click-through when locked,
@@ -120,21 +128,20 @@ public sealed class OverlayForm : Form
         using var smallFont = new Font("Bahnschrift SemiBold SemiConden", 15 * scale, FontStyle.Regular, GraphicsUnit.Pixel);
 
         var labelColor = Color.FromArgb(255, 233, 166);
-        var rows = new List<(string Label, string Value, Color Color)>
-        {
-            (L.T("Quest", "Misión"), L.N(t.Quest), Color.White),
-            state.InMatch
-                ? (L.T("In match", "En partida"), "…", Color.FromArgb(255, 120, 110))
-                : (L.T("Last", "Última"), t.Last != null ? L.N(t.Last.ChestsTotal) : "—", Color.White),
-            (L.T("Session", "Sesión"), L.N(t.Session), Color.White),
-            ("★", L.N(t.Treasures), Color.FromArgb(214, 190, 255)),
-        };
+        // In a match the total turns gold; "Last" stays the previous match (the current one is read when it ends).
+        var show = state.Rows ?? OverlayRows.All;
+        var rows = new List<(string Label, string Value, Color Color)>();
+        if (show.Quest) rows.Add((L.T("Quest", "Misión"), L.N(t.Quest), Color.White));
+        if (show.Last) rows.Add((L.T("Last", "Última"), t.Last != null ? L.N(t.Last.ChestsTotal) : "—", Color.White));
+        if (show.Session) rows.Add((L.T("Session", "Sesión"), L.N(t.Session), Color.White));
+        if (show.Treasures) rows.Add(("★", L.N(t.Treasures), Color.FromArgb(214, 190, 255)));
         const string Sep = "  •  ";
         var gap = S(5);
 
         // Every width comes from the glyph outlines actually drawn, so pieces line up exactly.
         var bigW = TextWidth(L.N(t.Real), bigFont);
-        var rowsW = rows.Max(r => (r.Label == "★" ? TextWidth("★", smallFont) : TextWidth(r.Label + Sep, smallFont)) + gap + TextWidth(r.Value, smallFont));
+        var rowsW = rows.Select(r => (r.Label == "★" ? TextWidth("★", smallFont) : TextWidth(r.Label + Sep, smallFont)) + gap + TextWidth(r.Value, smallFont))
+            .DefaultIfEmpty(0).Max(); // every row may be switched off
         var width = (int)Math.Ceiling(Math.Max(bigW + S(34), rowsW)) + S(24);
         var height = S(10) + bigFont.Height + rows.Count * (smallFont.Height + S(1)) + S(10);
         if (!state.Locked)

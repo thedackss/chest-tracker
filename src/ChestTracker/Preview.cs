@@ -76,6 +76,6 @@ public static class Preview
         public void ExportReport() { }
         public void OpenDataFolder() { }
         public void Quit() { }
-        public byte[] OverlayPng(float scale) => TrayApp.OverlayPng(new OverlayState(Totals, false, true), scale);
+        public byte[] OverlayPng(float scale) => TrayApp.OverlayPng(new OverlayState(Totals, false, true, OverlayRows.From(settings)), scale);
     }
 }

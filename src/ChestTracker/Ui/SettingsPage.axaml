@@ -94,6 +94,43 @@
           </StackPanel>
         </Border>
 
+        <TextBlock Classes="h3" Margin="0,6,0,0" Text="{ui:Tr 'On the overlay', 'En el overlay', Upper=True}" />
+        <Border Classes="card" Padding="16,2">
+          <StackPanel>
+            <Grid Classes="srow" ColumnDefinitions="*,Auto">
+              <StackPanel>
+                <TextBlock Text="{ui:Tr 'Quest', 'Misión'}" />
+                <TextBlock Classes="small" TextWrapping="Wrap"
+                           Text="{ui:Tr 'Turns off by itself when the quest reaches 1,000 (complete in game)', 'Se apaga solo cuando la misión llega a 1,000 (completa en el juego)'}" />
+              </StackPanel>
+              <ToggleSwitch Grid.Column="1" x:Name="QuestSwitch" />
+            </Grid>
+            <Border Classes="sep" />
+            <Grid Classes="srow" ColumnDefinitions="*,Auto">
+              <StackPanel>
+                <TextBlock Text="{ui:Tr 'Last match', 'Última partida'}" />
+                <TextBlock Classes="small" TextWrapping="Wrap"
+                           Text="{ui:Tr 'Chests in your previous match, also while you play the next one', 'Cofres de tu partida anterior, también mientras juegas la siguiente'}" />
+              </StackPanel>
+              <ToggleSwitch Grid.Column="1" x:Name="LastSwitch" />
+            </Grid>
+            <Border Classes="sep" />
+            <Grid Classes="srow" ColumnDefinitions="*,Auto">
+              <StackPanel>
+                <TextBlock Text="{ui:Tr 'Session', 'Sesión'}" />
+                <TextBlock Classes="small" TextWrapping="Wrap"
+                           Text="{ui:Tr 'Chests since chest-tracker started', 'Cofres desde que se abrió chest-tracker'}" />
+              </StackPanel>
+              <ToggleSwitch Grid.Column="1" x:Name="SessionSwitch" />
+            </Grid>
+            <Border Classes="sep" />
+            <Grid Classes="srow" ColumnDefinitions="*,Auto">
+              <TextBlock Text="{ui:Tr '★ Treasures', '★ Tesoros'}" />
+              <ToggleSwitch Grid.Column="1" x:Name="TreasuresSwitch" />
+            </Grid>
+          </StackPanel>
+        </Border>
+
         <Grid ColumnDefinitions="*,Auto" Margin="2,6,0,4">
           <TextBlock x:Name="AboutText" Classes="small" VerticalAlignment="Center" />
           <Button Grid.Column="1" x:Name="DataFolderButton" Classes="link" Content="{ui:Tr 'Open data folder', 'Abrir carpeta de datos'}" />

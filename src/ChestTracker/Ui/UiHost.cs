@@ -198,6 +198,8 @@ public static class UiHost
             {
                 Snap(new MainWindow(app, page), Path.Combine(folder, $"{theme}-{page.ToString().ToLowerInvariant()}.png"));
             }
+            // The whole settings page, without scrolling.
+            Snap(new MainWindow(app, Page.Settings) { Height = 1250 }, Path.Combine(folder, $"{theme}-settings-full.png"));
             var welcome = new WelcomeWindow(app.Settings);
             welcome.Progress.ScanDone = true;
             welcome.Progress.Tracked = app.Matches.Sum(m => m.QuestChests);

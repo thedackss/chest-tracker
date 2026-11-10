@@ -75,6 +75,14 @@ public sealed class Settings
     public bool StartWithFortnite { get; set; }
 
     public bool ShowOverlay { get; set; } = true;
+    /// <summary>Quest row on the overlay. Switched off once when the quest is complete (the user may turn it back on).</summary>
+    public bool OverlayShowQuest { get; set; } = true;
+    /// <summary>The quest reached <see cref="Totals.QuestGoal"/> and <see cref="OverlayShowQuest"/> was switched off for it.</summary>
+    public bool QuestCompleteHandled { get; set; }
+    /// <summary>Overlay rows under the total.</summary>
+    public bool OverlayShowLast { get; set; } = true;
+    public bool OverlayShowSession { get; set; } = true;
+    public bool OverlayShowTreasures { get; set; } = true;
     /// <summary>Hide the locked overlay while Fortnite is not running (unlocked it always shows, to be placed).</summary>
     public bool OverlayOnlyInGame { get; set; } = true;
     public bool OverlayLocked { get; set; }
@@ -98,6 +106,11 @@ public sealed class TrackerData
 /// <summary>Totals shown everywhere (overlay, tray, report, scan tool).</summary>
 public sealed record Totals(int Real, int Quest, int Matches, int Treasures, int Session, int SessionMatches, MatchRecord? Last)
 {
+    /// <summary>The in-game "Open treasure chests" quest ends here (this app keeps counting).</summary>
+    public const int QuestGoal = 1000;
+
+    public bool QuestComplete => Quest >= QuestGoal;
+
     public static Totals From(TrackerData data, Settings settings, DateTime sessionStartUtc)
     {
         var session = data.Matches.Where(m => m.AnalyzedAtUtc >= sessionStartUtc || m.When >= sessionStartUtc).ToList();

@@ -141,8 +141,10 @@ public sealed class TrayApp : ApplicationContext, IAppHost
 
     public void Quit() => ExitThread();
 
-    public byte[] OverlayPng(float scale) =>
-        OverlayPng(new OverlayState(Totals, _tracker.MatchInProgress, _settings.OverlayLocked), scale);
+    public byte[] OverlayPng(float scale) => OverlayPng(OverlayNow, scale);
+
+    private OverlayState OverlayNow =>
+        new(Totals, _tracker.MatchInProgress, _settings.OverlayLocked, OverlayRows.From(_settings));
 
     public static byte[] OverlayPng(OverlayState state, float scale)
     {
@@ -227,6 +229,13 @@ public sealed class TrayApp : ApplicationContext, IAppHost
         var summary = Text.T($"{Text.N(t.Real)} chests · quest {Text.N(t.Quest)}", $"{Text.N(t.Real)} cofres · misión {Text.N(t.Quest)}");
         var tip = "chest-tracker · " + summary;
         _tray.Text = tip.Length > 63 ? tip[..63] : tip;
+        // Quest complete in game: switch its overlay row off, once (it can be switched back on in Settings).
+        if (t.QuestComplete != _settings.QuestCompleteHandled)
+        {
+            _settings.QuestCompleteHandled = t.QuestComplete;
+            if (t.QuestComplete) _settings.OverlayShowQuest = false;
+            SaveSettings();
+        }
         UpdateOverlay();
         Changed?.Invoke();
     }
@@ -239,7 +248,7 @@ public sealed class TrayApp : ApplicationContext, IAppHost
             if (_overlay.IsOnScreen) _overlay.HideQuietly();
             return;
         }
-        _overlay.UpdateState(new OverlayState(Totals, _tracker.MatchInProgress, _settings.OverlayLocked), _settings.OverlaySize);
+        _overlay.UpdateState(OverlayNow, _settings.OverlaySize);
         if (!_overlay.IsOnScreen)
         {
             _overlay.Location = OverlayPosition();

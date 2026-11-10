@@ -57,6 +57,10 @@ public sealed partial class SettingsPage : UserControl
             if (!_loading && OverlaySwitch.IsChecked != _settings.ShowOverlay) _app.ToggleOverlay();
         };
         InGameSwitch.IsCheckedChanged += (_, _) => Change(() => _settings.OverlayOnlyInGame = InGameSwitch.IsChecked == true);
+        QuestSwitch.IsCheckedChanged += (_, _) => Change(() => _settings.OverlayShowQuest = QuestSwitch.IsChecked == true);
+        LastSwitch.IsCheckedChanged += (_, _) => Change(() => _settings.OverlayShowLast = LastSwitch.IsChecked == true);
+        SessionSwitch.IsCheckedChanged += (_, _) => Change(() => _settings.OverlayShowSession = SessionSwitch.IsChecked == true);
+        TreasuresSwitch.IsCheckedChanged += (_, _) => Change(() => _settings.OverlayShowTreasures = TreasuresSwitch.IsChecked == true);
         SizeSlider.ValueChanged += (_, _) => Change(() => _settings.OverlaySize = (int)SizeSlider.Value);
         LockButton.Click += (_, _) => _app.ToggleLock();
         DataFolderButton.Click += (_, _) => _app.OpenDataFolder();
@@ -147,6 +151,10 @@ public sealed partial class SettingsPage : UserControl
     {
         _loading = true;
         OverlaySwitch.IsChecked = _settings.ShowOverlay;
+        QuestSwitch.IsChecked = _settings.OverlayShowQuest; // may have switched off by itself (quest complete)
+        LastSwitch.IsChecked = _settings.OverlayShowLast;
+        SessionSwitch.IsChecked = _settings.OverlayShowSession;
+        TreasuresSwitch.IsChecked = _settings.OverlayShowTreasures;
         _loading = false;
         SizeText.Text = $"{_settings.OverlaySize} %";
         LockButton.Content = _app.OverlayLocked

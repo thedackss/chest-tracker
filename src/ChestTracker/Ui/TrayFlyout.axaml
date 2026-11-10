@@ -33,10 +33,10 @@
       </Grid>
       <Border Classes="sep" />
       <StackPanel Margin="6">
-        <Button x:Name="OpenButton" Classes="menu">
+        <Button x:Name="OpenButton" Classes="menu" AutomationProperties.Name="{ui:Tr 'Open chest-tracker', 'Abrir chest-tracker'}">
           <TextBlock FontWeight="SemiBold" Text="{ui:Tr 'Open chest-tracker', 'Abrir chest-tracker'}" />
         </Button>
-        <Button x:Name="OverlayButton" Classes="menu">
+        <Button x:Name="OverlayButton" Classes="menu" AutomationProperties.Name="{ui:Tr 'Show overlay', 'Mostrar overlay'}">
           <Grid ColumnDefinitions="*,Auto">
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
               <TextBlock VerticalAlignment="Center" Text="{ui:Tr 'Show overlay', 'Mostrar overlay'}" />
@@ -45,7 +45,7 @@
             <ToggleSwitch Grid.Column="1" x:Name="OverlaySwitch" IsHitTestVisible="False" Margin="0,-6" />
           </Grid>
         </Button>
-        <Button x:Name="LockButton" Classes="menu">
+        <Button x:Name="LockButton" Classes="menu" AutomationProperties.Name="{ui:Tr 'Lock overlay', 'Fijar overlay'}">
           <Grid ColumnDefinitions="*,Auto">
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
               <TextBlock VerticalAlignment="Center" Text="{ui:Tr 'Lock overlay', 'Fijar overlay'}" />

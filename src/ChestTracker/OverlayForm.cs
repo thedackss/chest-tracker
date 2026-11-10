@@ -19,6 +19,7 @@ public sealed class OverlayForm : Form
 {
     private const int WS_EX_LAYERED = 0x80000, WS_EX_TRANSPARENT = 0x20, WS_EX_TOOLWINDOW = 0x80, WS_EX_TOPMOST = 0x8, WS_EX_NOACTIVATE = 0x8000000;
     private const int GWL_EXSTYLE = -20, WM_NCHITTEST = 0x84, HTCAPTION = 2, WM_EXITSIZEMOVE = 0x232;
+    private const int SW_HIDE = 0, SW_SHOWNOACTIVATE = 4;
 
     private OverlayState? _state;
     private float _scale = 1f;
@@ -45,6 +46,25 @@ public sealed class OverlayForm : Form
     }
 
     protected override bool ShowWithoutActivation => true;
+
+    /// <summary>On screen (shown with <see cref="ShowQuietly"/>).</summary>
+    public bool IsOnScreen { get; private set; }
+
+    /// <summary>
+    /// Shows the overlay without touching the focus. Form.Show() deactivates the active window even with
+    /// ShowWithoutActivation: in game that is Fortnite, otherwise the tray panel (which then closes).
+    /// </summary>
+    public void ShowQuietly()
+    {
+        ShowWindow(Handle, SW_SHOWNOACTIVATE); // Handle creates the window the first time
+        IsOnScreen = true;
+    }
+
+    public void HideQuietly()
+    {
+        if (IsHandleCreated) ShowWindow(Handle, SW_HIDE);
+        IsOnScreen = false;
+    }
 
     /// <param name="sizePercent">User scale (Settings.OverlaySize), on top of the monitor DPI.</param>
     public void UpdateState(OverlayState state, int sizePercent)
@@ -227,6 +247,7 @@ public sealed class OverlayForm : Form
     [StructLayout(LayoutKind.Sequential)] private struct SIZE { public int Cx, Cy; public SIZE(int cx, int cy) { Cx = cx; Cy = cy; } }
     [StructLayout(LayoutKind.Sequential, Pack = 1)] private struct BLENDFUNCTION { public byte BlendOp, BlendFlags, SourceConstantAlpha, AlphaFormat; }
 
+    [DllImport("user32.dll")] private static extern bool ShowWindow(IntPtr hwnd, int command);
     [DllImport("user32.dll")] private static extern int GetWindowLong(IntPtr hwnd, int index);
     [DllImport("user32.dll")] private static extern int SetWindowLong(IntPtr hwnd, int index, int value);
     [DllImport("user32.dll")] private static extern bool UpdateLayeredWindow(IntPtr hwnd, IntPtr hdcDst, ref POINT pptDst, ref SIZE psize, IntPtr hdcSrc, ref POINT pptSrc, int crKey, ref BLENDFUNCTION pblend, int dwFlags);

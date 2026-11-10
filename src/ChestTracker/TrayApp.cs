@@ -30,6 +30,7 @@ public sealed class TrayApp : ApplicationContext, IAppHost
     private bool _fortniteRunning;
     private bool _matchInProgress;
     private string _demosFolder;
+    private DateTime _balloonClickedUtc;
 
     public TrayApp(Store store, Settings settings, Tracker tracker)
     {
@@ -45,10 +46,16 @@ public sealed class TrayApp : ApplicationContext, IAppHost
         _tray = new NotifyIcon { Icon = ChestArt.AppIcon(), Visible = true, ContextMenuStrip = BuildMenu() };
         _tray.MouseClick += (_, e) =>
         {
-            if (e.Button == MouseButtons.Left)
+            // A click on one of our notifications can arrive as a click on the icon too: that one opens the window.
+            if (e.Button == MouseButtons.Left && DateTime.UtcNow - _balloonClickedUtc > TimeSpan.FromSeconds(1))
             {
                 UiHost.ToggleFlyout(this, new Avalonia.PixelPoint(Cursor.Position.X, Cursor.Position.Y));
             }
+        };
+        _tray.BalloonTipClicked += (_, _) =>
+        {
+            _balloonClickedUtc = DateTime.UtcNow;
+            UiHost.ShowMain(this, Page.Overview);
         };
         _tray.DoubleClick += (_, _) => UiHost.ShowMain(this, Page.Overview);
 
@@ -247,14 +254,14 @@ public sealed class TrayApp : ApplicationContext, IAppHost
         var visible = _settings.ShowOverlay && (!_settings.OverlayOnlyInGame || _fortniteRunning || !_settings.OverlayLocked);
         if (!visible)
         {
-            if (_overlay.Visible) _overlay.Hide();
+            if (_overlay.IsOnScreen) _overlay.HideQuietly();
             return;
         }
         _overlay.UpdateState(new OverlayState(Totals, _tracker.MatchInProgress, _settings.OverlayLocked), _settings.OverlaySize);
-        if (!_overlay.Visible)
+        if (!_overlay.IsOnScreen)
         {
             _overlay.Location = OverlayPosition();
-            _overlay.Show();
+            _overlay.ShowQuietly();
         }
     }
 

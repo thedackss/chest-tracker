@@ -32,6 +32,8 @@ public sealed class Tracker
     private readonly Store _store;
     private readonly Settings _settings;
     private readonly Dictionary<string, long> _lastSeenSize = new();
+    /// <summary>Replays that could not be read on an earlier run: tried again, but failing again is not news.</summary>
+    private readonly HashSet<string> _failedBefore = new();
     private readonly object _lock = new();
 
     public TrackerData Data { get; }
@@ -93,9 +95,13 @@ public sealed class Tracker
     private void RequeueOutdated()
     {
         var outdated = Data.Matches.Where(m => m.AnalyzerVersion < ReplayAnalyzer.CurrentVersion).Select(m => m.SessionId).ToHashSet();
-        foreach (var key in Data.ProcessedFiles.Where(kv => outdated.Contains(kv.Value) || kv.Value.StartsWith("error:")).Select(kv => kv.Key).ToList())
+        foreach (var (key, state) in Data.ProcessedFiles.Where(kv => outdated.Contains(kv.Value) || kv.Value.StartsWith("error:")).ToList())
         {
             Data.ProcessedFiles.Remove(key);
+            if (state.StartsWith("error:"))
+            {
+                _failedBefore.Add(key);
+            }
         }
     }
 
@@ -188,6 +194,13 @@ public sealed class Tracker
             return null;
         }
 
+        // Empty file left by a recording that never started (only reached after minutes without changes).
+        if (file.Length == 0)
+        {
+            Mark(key, "empty");
+            return null;
+        }
+
         MatchRecord record;
         try
         {
@@ -196,8 +209,12 @@ public sealed class Tracker
         catch (Exception ex)
         {
             var message = (ex as AggregateException)?.InnerException?.Message ?? ex.Message;
-            _store.Log($"Unreadable replay: {file.FullName} ({file.Length} bytes)", ex);
             Mark(key, "error: " + message);
+            if (_failedBefore.Contains(key))
+            {
+                return null; // already logged and reported on an earlier run
+            }
+            _store.Log($"Unreadable replay: {file.FullName} ({file.Length} bytes)", ex);
             return new Outcome(null, $"{file.Name}: {message}");
         }
 

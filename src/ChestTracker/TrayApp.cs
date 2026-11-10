@@ -28,6 +28,7 @@ public sealed class TrayApp : ApplicationContext, IAppHost
     private bool _matchInProgress;
     private string _demosFolder;
     private DateTime _balloonClickedUtc;
+    private ObsServer? _obs;
 
     public TrayApp(Store store, Settings settings, Tracker tracker)
     {
@@ -77,6 +78,7 @@ public sealed class TrayApp : ApplicationContext, IAppHost
 
         _timer.Tick += (_, _) => Tick();
         _timer.Start();
+        ApplyObs();
         Refresh();
         Report.Write(_store, _settings, _tracker.MatchesSnapshot(), Totals);
         Tick();
@@ -109,6 +111,7 @@ public sealed class TrayApp : ApplicationContext, IAppHost
             _demosFolder = _settings.DemosFolder;
             _lastScanUtc = DateTime.MinValue; // scan the new folder now
         }
+        ApplyObs();
         Report.Write(_store, _settings, _tracker.MatchesSnapshot(), Totals);
         Refresh();
     }
@@ -143,6 +146,38 @@ public sealed class TrayApp : ApplicationContext, IAppHost
 
     public byte[] OverlayPng(float scale) => OverlayPng(OverlayNow, scale);
 
+    public string? ObsUrl => _obs?.Url;
+
+    /// <summary>Starts or stops the OBS overlay server to match the setting.</summary>
+    private void ApplyObs()
+    {
+        if (_settings.ObsOverlay && _obs == null)
+        {
+            _obs = ObsServer.Start(_settings.ObsPort);
+            if (_obs == null) _store.Log($"OBS overlay: no free port from {_settings.ObsPort}");
+            UpdateObs();
+        }
+        else if (!_settings.ObsOverlay && _obs != null)
+        {
+            _obs.Dispose();
+            _obs = null;
+        }
+    }
+
+    /// <summary>The figures the OBS page shows: the same rows as the overlay.</summary>
+    private void UpdateObs()
+    {
+        if (_obs == null) return;
+        var t = Totals;
+        var show = OverlayRows.From(_settings);
+        var rows = new List<object>();
+        if (show.Quest) rows.Add(new { label = Text.T("Quest", "Misión"), value = Text.N(t.Quest) });
+        if (show.Last) rows.Add(new { label = Text.T("Last", "Última"), value = t.Last != null ? Text.N(t.Last.ChestsTotal) : "—" });
+        if (show.Session) rows.Add(new { label = Text.T("Session", "Sesión"), value = Text.N(t.Session) });
+        if (show.Treasures) rows.Add(new { label = "★", value = Text.N(t.Treasures), star = true });
+        _obs.Update(System.Text.Json.JsonSerializer.Serialize(new { total = Text.N(t.Real), inMatch = _tracker.MatchInProgress, rows }));
+    }
+
     private OverlayState OverlayNow =>
         new(Totals, _tracker.MatchInProgress, _settings.OverlayLocked, OverlayRows.From(_settings));
 
@@ -163,6 +198,7 @@ public sealed class TrayApp : ApplicationContext, IAppHost
         {
             _fortniteRunning = running;
             _matchInProgress = _tracker.MatchInProgress;
+            UpdateObs(); // gold total while in a match
             Changed?.Invoke(); // status line, overlay preview
         }
         var interval = _tracker.Finishing ? FinishingInterval : ScanInterval;
@@ -237,6 +273,7 @@ public sealed class TrayApp : ApplicationContext, IAppHost
             SaveSettings();
         }
         UpdateOverlay();
+        UpdateObs();
         Changed?.Invoke();
     }
 
@@ -299,6 +336,7 @@ public sealed class TrayApp : ApplicationContext, IAppHost
     {
         _timer.Stop();
         _hotkeys.Dispose();
+        _obs?.Dispose();
         UiHost.CloseAll();
         _tray.Visible = false;
         _tray.Dispose();

@@ -76,6 +76,7 @@ public static class Preview
         public void ExportReport() { }
         public void OpenDataFolder() { }
         public void Quit() { }
+        public string? ObsUrl => settings.ObsOverlay ? $"http://localhost:{settings.ObsPort}/overlay" : null;
         public byte[] OverlayPng(float scale) => TrayApp.OverlayPng(new OverlayState(Totals, false, true, OverlayRows.From(settings)), scale);
     }
 }

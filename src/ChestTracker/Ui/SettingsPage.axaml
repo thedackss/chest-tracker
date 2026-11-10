@@ -131,6 +131,28 @@
           </StackPanel>
         </Border>
 
+        <TextBlock Classes="h3" Margin="0,6,0,0" Text="{ui:Tr 'Streaming (OBS)', 'Streaming (OBS)', Upper=True}" />
+        <Border Classes="card" Padding="16,2">
+          <StackPanel>
+            <Grid Classes="srow" ColumnDefinitions="*,Auto">
+              <StackPanel>
+                <TextBlock Text="{ui:Tr 'Overlay for OBS', 'Overlay para OBS'}" />
+                <TextBlock Classes="small" TextWrapping="Wrap"
+                           Text="{ui:Tr 'Add it in OBS as a Browser Source. Only programs on this PC can open it.', 'Agrégalo en OBS como Fuente de navegador. Solo los programas de este PC pueden abrirlo.'}" />
+              </StackPanel>
+              <ToggleSwitch Grid.Column="1" x:Name="ObsSwitch" />
+            </Grid>
+            <StackPanel x:Name="ObsPanel" Margin="0,0,0,12" Spacing="8">
+              <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+                <TextBox x:Name="ObsUrlBox" IsReadOnly="True" FontSize="12" />
+                <Button Grid.Column="1" x:Name="ObsCopyButton" Content="{ui:Tr Copy, Copiar}" />
+                <Button Grid.Column="2" x:Name="ObsOpenButton" Content="{ui:Tr Open, Abrir}" />
+              </Grid>
+              <TextBlock x:Name="ObsInfo" Classes="small" TextWrapping="Wrap" />
+            </StackPanel>
+          </StackPanel>
+        </Border>
+
         <Grid ColumnDefinitions="*,Auto" Margin="2,6,0,4">
           <TextBlock x:Name="AboutText" Classes="small" VerticalAlignment="Center" />
           <Button Grid.Column="1" x:Name="DataFolderButton" Classes="link" Content="{ui:Tr 'Open data folder', 'Abrir carpeta de datos'}" />

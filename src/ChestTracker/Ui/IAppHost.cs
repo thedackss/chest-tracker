@@ -25,4 +25,7 @@ public interface IAppHost
 
     /// <summary>The real overlay drawing as PNG, at <paramref name="scale"/> (1 = 100 %), for the settings preview.</summary>
     byte[] OverlayPng(float scale);
+
+    /// <summary>Address of the OBS overlay page while it is served (null when off or no port was free).</summary>
+    string? ObsUrl { get; }
 }

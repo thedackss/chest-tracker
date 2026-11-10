@@ -83,6 +83,10 @@ public sealed class Settings
     public bool OverlayShowLast { get; set; } = true;
     public bool OverlayShowSession { get; set; } = true;
     public bool OverlayShowTreasures { get; set; } = true;
+
+    /// <summary>Serves the overlay to OBS (Browser Source) at http://localhost:<see cref="ObsPort"/>, this PC only.</summary>
+    public bool ObsOverlay { get; set; }
+    public int ObsPort { get; set; } = 28282;
     /// <summary>Hide the locked overlay while Fortnite is not running (unlocked it always shows, to be placed).</summary>
     public bool OverlayOnlyInGame { get; set; } = true;
     public bool OverlayLocked { get; set; }

@@ -20,6 +20,10 @@ It only reads `.replay` files. It does not touch the game, its memory or your Ep
 
 For the overlay to show over the game, use **Windowed Fullscreen** (Settings → Video → Window Mode).
 
+Streaming with OBS (Game Capture doesn't see the overlay): turn on **Settings → Streaming (OBS) → Overlay for OBS**, then in OBS
+add **Sources → + → Browser** with the address shown there (`http://localhost:28282/overlay`), width 500, height 300.
+Add `?align=left` or `?scale=1.5` to the address to change it.
+
 | Shortcut | |
 |---|---|
 | Ctrl+Shift+O | show / hide the overlay |
@@ -42,6 +46,10 @@ then delete the exe and the `%APPDATA%\chest-tracker` folder.
 ## Privacy
 
 This program will not transfer any information to other networked systems unless specifically requested by the user or the person installing or operating it.
+
+The optional **Overlay for OBS** (Settings → Streaming, off by default) serves your chest counts at
+`http://localhost:28282/overlay` so OBS can show them. It only listens on this PC (127.0.0.1) and refuses requests
+addressed to anything other than `localhost`; nothing is reachable from your network or the internet.
 
 ## Code signing policy
 

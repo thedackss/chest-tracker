@@ -1,5 +1,6 @@
 using System.Reflection;
 using Avalonia.Controls;
+using Avalonia.Input.Platform;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform.Storage;
 using Avalonia.Threading;
@@ -61,6 +62,28 @@ public sealed partial class SettingsPage : UserControl
         LastSwitch.IsCheckedChanged += (_, _) => Change(() => _settings.OverlayShowLast = LastSwitch.IsChecked == true);
         SessionSwitch.IsCheckedChanged += (_, _) => Change(() => _settings.OverlayShowSession = SessionSwitch.IsChecked == true);
         TreasuresSwitch.IsCheckedChanged += (_, _) => Change(() => _settings.OverlayShowTreasures = TreasuresSwitch.IsChecked == true);
+        ObsSwitch.IsChecked = _settings.ObsOverlay;
+        ObsSwitch.IsCheckedChanged += (_, _) =>
+        {
+            Change(() => _settings.ObsOverlay = ObsSwitch.IsChecked == true);
+            UpdateObs();
+        };
+        ObsCopyButton.Click += async (_, _) =>
+        {
+            if (_app.ObsUrl is { } url && TopLevel.GetTopLevel(this)?.Clipboard is { } clipboard)
+            {
+                await clipboard.SetTextAsync(url);
+                ObsCopyButton.Content = L.T("Copied", "Copiado");
+            }
+        };
+        ObsOpenButton.Click += (_, _) =>
+        {
+            if (_app.ObsUrl is { } url)
+            {
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(url) { UseShellExecute = true })?.Dispose();
+            }
+        };
+        UpdateObs();
         SizeSlider.ValueChanged += (_, _) => Change(() => _settings.OverlaySize = (int)SizeSlider.Value);
         LockButton.Click += (_, _) => _app.ToggleLock();
         DataFolderButton.Click += (_, _) => _app.OpenDataFolder();
@@ -137,6 +160,21 @@ public sealed partial class SettingsPage : UserControl
               + (value >= Totals.QuestGoal
                   ? L.T($"\nThe in-game quest stops at {L.N(Totals.QuestGoal)}; this keeps counting.", $"\nLa misión del juego se detiene en {L.N(Totals.QuestGoal)}; esto sigue contando.")
                   : "");
+    }
+
+    private void UpdateObs()
+    {
+        var url = _app.ObsUrl;
+        ObsPanel.IsVisible = _settings.ObsOverlay;
+        ObsUrlBox.Text = url ?? "";
+        ObsCopyButton.IsEnabled = ObsOpenButton.IsEnabled = url != null;
+        ObsInfo.Classes.Set("bad", url == null);
+        ObsInfo.Text = url == null
+            ? L.T("Could not start: no free port. Details in errors.log (data folder).", "No se pudo iniciar: no hay un puerto libre. Detalles en errors.log (carpeta de datos).")
+            : L.T("In OBS: Sources → + → Browser, paste the address, width 500, height 300. It shows the rows chosen above and updates by itself. "
+                  + "Add ?align=left or ?scale=1.5 to the address to change it.",
+                  "En OBS: Fuentes → + → Navegador, pega la dirección, ancho 500, alto 300. Muestra las filas elegidas arriba y se actualiza solo. "
+                  + "Agrega ?align=left o ?scale=1.5 a la dirección para cambiarlo.");
     }
 
     private void UpdateFolderInfo()

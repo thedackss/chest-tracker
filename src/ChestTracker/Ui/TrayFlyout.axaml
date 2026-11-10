@@ -1,0 +1,63 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:ui="using:ChestTracker.Ui"
+        x:Class="ChestTracker.Ui.TrayFlyout"
+        Title="chest-tracker"
+        WindowDecorations="None" Topmost="True" ShowInTaskbar="False" CanResize="False"
+        SizeToContent="WidthAndHeight" Background="{DynamicResource CtCard}">
+  <!-- Rounded corners and border come from Windows 11 (see TrayFlyout.Opened). -->
+  <Border Width="300">
+    <StackPanel>
+      <Border Background="{DynamicResource CtCard2}" Padding="16,14">
+        <StackPanel Orientation="Horizontal" Spacing="12">
+          <ui:ChestIcon Width="46" Height="40" />
+          <StackPanel VerticalAlignment="Center">
+            <TextBlock x:Name="QuestText" Classes="big" FontSize="30" LineHeight="32" />
+            <TextBlock x:Name="SubText" Classes="muted" />
+          </StackPanel>
+        </StackPanel>
+      </Border>
+      <Grid ColumnDefinitions="*,*,*" Margin="0,8">
+        <StackPanel HorizontalAlignment="Center">
+          <TextBlock x:Name="LastText" Classes="num" FontSize="17" HorizontalAlignment="Center" />
+          <TextBlock Classes="small" FontSize="11" HorizontalAlignment="Center" Text="{ui:Tr 'last match', 'última partida'}" />
+        </StackPanel>
+        <StackPanel Grid.Column="1" HorizontalAlignment="Center">
+          <TextBlock x:Name="TodayText" Classes="num" FontSize="17" HorizontalAlignment="Center" />
+          <TextBlock Classes="small" FontSize="11" HorizontalAlignment="Center" Text="{ui:Tr today, hoy}" />
+        </StackPanel>
+        <StackPanel Grid.Column="2" HorizontalAlignment="Center">
+          <TextBlock x:Name="TreasuresText" Classes="num star" FontSize="17" HorizontalAlignment="Center" />
+          <TextBlock Classes="small" FontSize="11" HorizontalAlignment="Center" Text="{ui:Tr treasures, tesoros}" />
+        </StackPanel>
+      </Grid>
+      <Border Classes="sep" />
+      <StackPanel Margin="6">
+        <Button x:Name="OpenButton" Classes="menu">
+          <TextBlock FontWeight="SemiBold" Text="{ui:Tr 'Open chest-tracker', 'Abrir chest-tracker'}" />
+        </Button>
+        <Button x:Name="OverlayButton" Classes="menu">
+          <Grid ColumnDefinitions="*,Auto">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+              <TextBlock VerticalAlignment="Center" Text="{ui:Tr 'Show overlay', 'Mostrar overlay'}" />
+              <Border Classes="kbd"><TextBlock Text="Ctrl+Shift+O" /></Border>
+            </StackPanel>
+            <ToggleSwitch Grid.Column="1" x:Name="OverlaySwitch" IsHitTestVisible="False" Margin="0,-6" />
+          </Grid>
+        </Button>
+        <Button x:Name="LockButton" Classes="menu">
+          <Grid ColumnDefinitions="*,Auto">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+              <TextBlock VerticalAlignment="Center" Text="{ui:Tr 'Lock overlay', 'Fijar overlay'}" />
+              <Border Classes="kbd"><TextBlock Text="Ctrl+Shift+L" /></Border>
+            </StackPanel>
+            <ToggleSwitch Grid.Column="1" x:Name="LockSwitch" IsHitTestVisible="False" Margin="0,-6" />
+          </Grid>
+        </Button>
+        <Border Classes="sep" Margin="6,4" />
+        <Button x:Name="SettingsButton" Classes="menu" Content="{ui:Tr 'Settings', 'Ajustes'}" />
+        <Button x:Name="QuitButton" Classes="menu" Content="{ui:Tr 'Quit', 'Salir'}" />
+      </StackPanel>
+    </StackPanel>
+  </Border>
+</Window>

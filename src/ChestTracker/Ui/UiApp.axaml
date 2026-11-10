@@ -1,0 +1,224 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="ChestTracker.Ui.UiApp">
+  <!-- Colours from design/mockups.html, direction A (gold on dark) and its light variant. -->
+  <Application.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.ThemeDictionaries>
+        <ResourceDictionary x:Key="Dark">
+          <SolidColorBrush x:Key="CtBg" Color="#0f1117" />
+          <SolidColorBrush x:Key="CtSide" Color="#0b0d12" />
+          <SolidColorBrush x:Key="CtCard" Color="#181b24" />
+          <SolidColorBrush x:Key="CtCard2" Color="#1f2330" />
+          <SolidColorBrush x:Key="CtLine" Color="#262a36" />
+          <SolidColorBrush x:Key="CtText" Color="#e8e8ef" />
+          <SolidColorBrush x:Key="CtMuted" Color="#8a8fa3" />
+          <SolidColorBrush x:Key="CtAccent" Color="#ffcd46" />
+          <SolidColorBrush x:Key="CtBar" Color="#ffcd46" />
+          <SolidColorBrush x:Key="CtAccent2" Color="#d6beff" />
+          <SolidColorBrush x:Key="CtGood" Color="#3fbf6f" />
+          <SolidColorBrush x:Key="CtBad" Color="#ff7a6e" />
+        </ResourceDictionary>
+        <ResourceDictionary x:Key="Light">
+          <SolidColorBrush x:Key="CtBg" Color="#f5f6f8" />
+          <SolidColorBrush x:Key="CtSide" Color="#eceef2" />
+          <SolidColorBrush x:Key="CtCard" Color="#ffffff" />
+          <SolidColorBrush x:Key="CtCard2" Color="#f1f2f5" />
+          <SolidColorBrush x:Key="CtLine" Color="#dfe2e8" />
+          <SolidColorBrush x:Key="CtText" Color="#15171c" />
+          <SolidColorBrush x:Key="CtMuted" Color="#5b6070" />
+          <SolidColorBrush x:Key="CtAccent" Color="#8a5f00" />
+          <SolidColorBrush x:Key="CtBar" Color="#c48a00" />
+          <SolidColorBrush x:Key="CtAccent2" Color="#6b3fb3" />
+          <SolidColorBrush x:Key="CtGood" Color="#1f8a4c" />
+          <SolidColorBrush x:Key="CtBad" Color="#c0392b" />
+        </ResourceDictionary>
+      </ResourceDictionary.ThemeDictionaries>
+
+      <!-- Gold buttons and switches in both themes, with dark text on them. -->
+      <SolidColorBrush x:Key="CtOn" Color="#ffcd46" />
+      <SolidColorBrush x:Key="CtOnHover" Color="#ffd866" />
+      <SolidColorBrush x:Key="CtOnPressed" Color="#f0bb2e" />
+      <SolidColorBrush x:Key="CtInk" Color="#1a1400" />
+      <FontFamily x:Key="CtNumFont">Bahnschrift, Segoe UI</FontFamily>
+
+      <StaticResource x:Key="ToggleSwitchFillOn" ResourceKey="CtOn" />
+      <StaticResource x:Key="ToggleSwitchFillOnPointerOver" ResourceKey="CtOnHover" />
+      <StaticResource x:Key="ToggleSwitchFillOnPressed" ResourceKey="CtOnPressed" />
+      <StaticResource x:Key="ToggleSwitchKnobFillOn" ResourceKey="CtInk" />
+      <StaticResource x:Key="ToggleSwitchKnobFillOnPointerOver" ResourceKey="CtInk" />
+      <StaticResource x:Key="ToggleSwitchKnobFillOnPressed" ResourceKey="CtInk" />
+      <StaticResource x:Key="AccentButtonBackground" ResourceKey="CtOn" />
+      <StaticResource x:Key="AccentButtonBackgroundPointerOver" ResourceKey="CtOnHover" />
+      <StaticResource x:Key="AccentButtonBackgroundPressed" ResourceKey="CtOnPressed" />
+      <StaticResource x:Key="AccentButtonForeground" ResourceKey="CtInk" />
+      <StaticResource x:Key="AccentButtonForegroundPointerOver" ResourceKey="CtInk" />
+      <StaticResource x:Key="AccentButtonForegroundPressed" ResourceKey="CtInk" />
+
+      <!-- Segmented choice (theme, chart range): a row of these inside a Border.seg. -->
+      <ControlTheme x:Key="CtSegment" TargetType="RadioButton">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{DynamicResource CtMuted}" />
+        <Setter Property="Padding" Value="10,3" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Template">
+          <ControlTemplate>
+            <Border Background="{TemplateBinding Background}" CornerRadius="5" Padding="{TemplateBinding Padding}">
+              <ContentPresenter Content="{TemplateBinding Content}" Foreground="{TemplateBinding Foreground}" />
+            </Border>
+          </ControlTemplate>
+        </Setter>
+        <Style Selector="^:pointerover">
+          <Setter Property="Foreground" Value="{DynamicResource CtText}" />
+        </Style>
+        <Style Selector="^:checked">
+          <Setter Property="Background" Value="{DynamicResource CtCard}" />
+          <Setter Property="Foreground" Value="{DynamicResource CtText}" />
+        </Style>
+      </ControlTheme>
+    </ResourceDictionary>
+  </Application.Resources>
+
+  <Application.Styles>
+    <FluentTheme>
+      <FluentTheme.Palettes>
+        <ColorPaletteResources x:Key="Dark" Accent="#ffcd46" RegionColor="#0f1117" />
+        <ColorPaletteResources x:Key="Light" Accent="#d99a00" RegionColor="#f5f6f8" />
+      </FluentTheme.Palettes>
+    </FluentTheme>
+
+    <Style Selector="Window">
+      <Setter Property="Background" Value="{DynamicResource CtBg}" />
+      <Setter Property="Foreground" Value="{DynamicResource CtText}" />
+      <Setter Property="FontSize" Value="14" />
+    </Style>
+
+    <Style Selector="Border.card">
+      <Setter Property="Background" Value="{DynamicResource CtCard}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource CtLine}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="12" />
+    </Style>
+    <Style Selector="Border.seg">
+      <Setter Property="Background" Value="{DynamicResource CtCard2}" />
+      <Setter Property="CornerRadius" Value="6" />
+      <Setter Property="Padding" Value="2" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+    <Style Selector="Border.kbd">
+      <Setter Property="BorderBrush" Value="{DynamicResource CtLine}" />
+      <Setter Property="BorderThickness" Value="1,1,1,2" />
+      <Setter Property="CornerRadius" Value="4" />
+      <Setter Property="Padding" Value="5,0" />
+      <Setter Property="Margin" Value="8,0,0,0" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+    <Style Selector="Border.kbd > TextBlock">
+      <Setter Property="FontSize" Value="11" />
+      <Setter Property="Foreground" Value="{DynamicResource CtMuted}" />
+    </Style>
+    <Style Selector="Border.sep">
+      <Setter Property="Height" Value="1" />
+      <Setter Property="Background" Value="{DynamicResource CtLine}" />
+    </Style>
+
+    <Style Selector="TextBlock.h3">
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="Foreground" Value="{DynamicResource CtMuted}" />
+      <Setter Property="LetterSpacing" Value="0.8" />
+    </Style>
+    <Style Selector="TextBlock.muted">
+      <Setter Property="FontSize" Value="13" />
+      <Setter Property="Foreground" Value="{DynamicResource CtMuted}" />
+    </Style>
+    <Style Selector="TextBlock.small">
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="Foreground" Value="{DynamicResource CtMuted}" />
+    </Style>
+    <Style Selector="TextBlock.num">
+      <Setter Property="FontFamily" Value="{StaticResource CtNumFont}" />
+      <Setter Property="FontWeight" Value="Bold" />
+    </Style>
+    <Style Selector="TextBlock.big">
+      <Setter Property="FontFamily" Value="{StaticResource CtNumFont}" />
+      <Setter Property="FontWeight" Value="Bold" />
+      <Setter Property="FontSize" Value="52" />
+      <Setter Property="LineHeight" Value="54" />
+      <Setter Property="Foreground" Value="{DynamicResource CtAccent}" />
+    </Style>
+    <Style Selector="TextBlock.gold">
+      <Setter Property="Foreground" Value="{DynamicResource CtAccent}" />
+    </Style>
+    <Style Selector="TextBlock.bad">
+      <Setter Property="Foreground" Value="{DynamicResource CtBad}" />
+    </Style>
+    <Style Selector="TextBlock.star">
+      <Setter Property="Foreground" Value="{DynamicResource CtAccent2}" />
+    </Style>
+
+    <!-- Toggle switches: no "On"/"Off" text, just the switch. -->
+    <Style Selector="ToggleSwitch">
+      <Setter Property="OnContent" Value="{x:Null}" />
+      <Setter Property="OffContent" Value="{x:Null}" />
+      <Setter Property="MinWidth" Value="0" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <!-- Side navigation. -->
+    <Style Selector="Button.nav">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="Foreground" Value="{DynamicResource CtMuted}" />
+      <Setter Property="HorizontalAlignment" Value="Stretch" />
+      <Setter Property="HorizontalContentAlignment" Value="Left" />
+      <Setter Property="Padding" Value="12,9" />
+      <Setter Property="CornerRadius" Value="8" />
+      <Setter Property="FontWeight" Value="Medium" />
+      <Setter Property="Cursor" Value="Hand" />
+    </Style>
+    <Style Selector="Button.nav:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource CtCard2}" />
+      <Setter Property="Foreground" Value="{DynamicResource CtText}" />
+    </Style>
+    <Style Selector="Button.nav.on /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource CtCard}" />
+      <Setter Property="Foreground" Value="{DynamicResource CtText}" />
+    </Style>
+    <Style Selector="Button.nav PathIcon">
+      <Setter Property="Width" Value="16" />
+      <Setter Property="Height" Value="16" />
+    </Style>
+    <Style Selector="Button.nav.on PathIcon">
+      <Setter Property="Foreground" Value="{DynamicResource CtAccent}" />
+    </Style>
+
+    <!-- Plain text link. -->
+    <Style Selector="Button.link">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="Foreground" Value="{DynamicResource CtAccent}" />
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="Cursor" Value="Hand" />
+    </Style>
+    <Style Selector="Button.link:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="Foreground" Value="{DynamicResource CtText}" />
+    </Style>
+
+    <!-- Tray flyout rows. -->
+    <Style Selector="Button.menu">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="HorizontalAlignment" Value="Stretch" />
+      <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+      <Setter Property="Padding" Value="10,7" />
+      <Setter Property="CornerRadius" Value="6" />
+      <Setter Property="FontSize" Value="13" />
+      <Setter Property="MinHeight" Value="34" />
+    </Style>
+    <Style Selector="Button.menu:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource CtCard2}" />
+    </Style>
+  </Application.Styles>
+</Application>

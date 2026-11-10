@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Windows.Forms;
 using Microsoft.Win32;
 
 namespace ChestTracker;

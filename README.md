@@ -5,7 +5,8 @@ Made for the Treasure Hunters Pirate Shop token hunt: the token drops from chest
 
 - **Total**: every chest you opened, dug up (buried chests) or broke (floor/wall destroyed under it).
 - **Quest**: chests opened or dug up, not broken, which is what the in-game "Open treasure chests" quest counts. It keeps counting after the quest stops at 1000.
-- In-game overlay, tray icon, a notification after each match, and an HTML report with every match.
+- In-game overlay, tray icon, a notification after each match, and a window with your totals, chests per day and every match
+  (dark or light, English or Spanish).
 
 It only reads `.replay` files. It does not touch the game, its memory or your Epic account. It makes no network calls.
 
@@ -24,7 +25,8 @@ For the overlay to show over the game, use **Windowed Fullscreen** (Settings →
 | Ctrl+Shift+O | show / hide the overlay |
 | Ctrl+Shift+L | lock / unlock the overlay (unlocked: drag it) |
 
-The tray icon menu has the report and the settings. Data lives in `%APPDATA%\chest-tracker`.
+Click the tray icon for today's numbers and quick toggles; double-click it (or run the exe again) to open the window,
+with the overview, every match (exportable as an HTML report) and the settings. Data lives in `%APPDATA%\chest-tracker`.
 
 ## What it changes on your PC, and uninstalling
 
@@ -61,10 +63,11 @@ dotnet run --project tools/scan -- <replay or folder> [--start N]   # per-match 
 ```
 
 `tools/make-icon.ps1` regenerates the app icon (Windows).
+`ChestTracker.exe --data <test folder> --preview <folder>` saves screenshots of the overlay and every window (dark and light).
 
 ## Credits
 
 The replay parser (`lib/`) and the chest-attribution logic come from
 [LED-N/Fortnite-ChestCounter](https://github.com/LED-N/Fortnite-ChestCounter) and
 [Shiqan/FortniteReplayDecompressor](https://github.com/Shiqan/FortniteReplayDecompressor), both MIT.
-See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+The windows use [Avalonia](https://avaloniaui.net) (MIT). See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

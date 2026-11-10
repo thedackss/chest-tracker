@@ -1,0 +1,40 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ui="using:ChestTracker.Ui"
+             x:Class="ChestTracker.Ui.MainView">
+  <Grid ColumnDefinitions="200,*">
+    <Border Background="{DynamicResource CtSide}" BorderBrush="{DynamicResource CtLine}" BorderThickness="0,0,1,0" Padding="10,12">
+      <DockPanel>
+        <Grid DockPanel.Dock="Bottom" ColumnDefinitions="Auto,*" ColumnSpacing="8" Margin="12,10">
+          <Ellipse x:Name="StatusDot" Width="8" Height="8" VerticalAlignment="Top" Margin="0,5,0,0" Fill="{DynamicResource CtGood}" />
+          <TextBlock Grid.Column="1" x:Name="StatusText" Classes="small" TextWrapping="Wrap" />
+        </Grid>
+        <StackPanel Spacing="2">
+          <StackPanel Orientation="Horizontal" Spacing="10" Margin="10,2,0,16">
+            <ui:ChestIcon Width="28" Height="25" />
+            <TextBlock Text="chest-tracker" FontWeight="SemiBold" FontSize="15" VerticalAlignment="Center" />
+          </StackPanel>
+          <Button x:Name="NavOverview" Classes="nav">
+            <StackPanel Orientation="Horizontal" Spacing="10">
+              <PathIcon Data="M3 20h18v-2H3zM5 16h3V9H5zM10.5 16h3V4h-3zM16 16h3v-6h-3z" />
+              <TextBlock Text="{ui:Tr Overview, Resumen}" />
+            </StackPanel>
+          </Button>
+          <Button x:Name="NavMatches" Classes="nav">
+            <StackPanel Orientation="Horizontal" Spacing="10">
+              <PathIcon Data="M3 5h2v2H3zM8 5h13v2H8zM3 11h2v2H3zM8 11h13v2H8zM3 17h2v2H3zM8 17h13v2H8z" />
+              <TextBlock Text="{ui:Tr Matches, Partidas}" />
+            </StackPanel>
+          </Button>
+          <Button x:Name="NavSettings" Classes="nav">
+            <StackPanel Orientation="Horizontal" Spacing="10">
+              <PathIcon Data="M3 5h10v2H3zM17 5h4v2h-4zM13 3.5h3v5h-3zM3 11h3v2H3zM10 11h11v2H10zM6 9.5h3v5H6zM3 17h12v2H3zM19 17h2v2h-2zM15 15.5h3v5h-3z" />
+              <TextBlock Text="{ui:Tr Settings, Ajustes}" />
+            </StackPanel>
+          </Button>
+        </StackPanel>
+      </DockPanel>
+    </Border>
+    <ContentControl Grid.Column="1" x:Name="PageHost" Margin="26,22" />
+  </Grid>
+</UserControl>

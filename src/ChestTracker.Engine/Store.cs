@@ -30,6 +30,10 @@ public sealed class Store
 
     public bool HasSettings => File.Exists(SettingsPath);
 
+    /// <summary>The real data folder (not a test one given with --data): only then may machine-wide things like autostart change.</summary>
+    public bool IsDefaultFolder =>
+        string.Equals(Path.GetFullPath(Folder).TrimEnd('\\', '/'), Path.GetFullPath(DefaultFolder).TrimEnd('\\', '/'), StringComparison.OrdinalIgnoreCase);
+
     public Settings LoadSettings() => Load<Settings>(SettingsPath) ?? new Settings();
     public void SaveSettings(Settings s) => Save(SettingsPath, s);
 

@@ -1,3 +1,6 @@
+using System.Runtime.InteropServices;
+using System.Windows.Forms;
+
 namespace ChestTracker;
 
 public static class Program
@@ -8,7 +11,7 @@ public static class Program
     // ChestTracker.exe [--background] [--data <folder>] [--preview <folder>]
     //   --background  started with Windows: no welcome screen, just the tray
     //   --data        another data folder (testing)
-    //   --preview     saves overlay and settings screenshots to <folder>, then quits
+    //   --preview     saves overlay, chest and window screenshots (dark and light) to <folder>, then quits
     //   --make-icon   writes the app icon (.ico) to <file>, then quits (tools/make-icon.ps1)
     [STAThread]
     public static int Main(string[] args)
@@ -49,24 +52,27 @@ public static class Program
         using var showEvent = new EventWaitHandle(false, EventResetMode.AutoReset, ShowEventName + suffix);
         if (!first)
         {
-            showEvent.Set(); // the running one opens its settings
+            // The running one opens its window. Only the foreground process (this one) may let it come to the front.
+            AllowSetForegroundWindow(-1 /* ASFW_ANY */);
+            showEvent.Set();
             return 0;
         }
 
         var tracker = new Tracker(store, settings, store.LoadData());
         if (firstRun)
         {
-            // Count the replays already on the PC first, so the welcome screen can turn the quest value into a start.
-            ScanWithProgress(tracker);
-            using var welcome = new SettingsForm(settings, tracker.MatchesSnapshot().Sum(m => m.QuestChests), welcome: true);
-            if (welcome.ShowDialog() != DialogResult.OK)
+            // Reads the replays already on the PC meanwhile, so the quest value can be turned into a start.
+            if (!Ui.UiHost.RunWelcome(store, settings, tracker))
             {
                 return 0;
             }
             Text.Set(settings.Language);
         }
         store.SaveSettings(settings);
-        Autostart.Apply(settings.StartWithFortnite);
+        if (store.IsDefaultFolder)
+        {
+            Autostart.Apply(settings.StartWithFortnite);
+        }
 
         var app = new TrayApp(store, settings, tracker);
         var waiter = new Thread(() =>
@@ -81,37 +87,5 @@ public static class Program
         return 0;
     }
 
-    /// <summary>First launch: a small window while the replays already on disk are analyzed.</summary>
-    private static void ScanWithProgress(Tracker tracker)
-    {
-        if (tracker.UnprocessedFiles().Count == 0)
-        {
-            return;
-        }
-        using var form = new Form
-        {
-            Text = "chest-tracker",
-            Icon = ChestArt.AppIcon(),
-            FormBorderStyle = FormBorderStyle.FixedDialog,
-            ControlBox = false,
-            StartPosition = FormStartPosition.CenterScreen,
-            ClientSize = new Size(380, 90),
-            Font = new Font("Segoe UI", 9.5f),
-        };
-        var label = new Label { Text = Text.T("Reading your replays…", "Leyendo tus repeticiones…"), Location = new Point(16, 16), AutoSize = true };
-        var bar = new ProgressBar { Location = new Point(16, 46), Width = 348, Style = ProgressBarStyle.Continuous };
-        form.Controls.Add(label);
-        form.Controls.Add(bar);
-        form.Shown += async (_, _) =>
-        {
-            await Task.Run(() => tracker.Scan(ignoreQuietPeriod: true, (done, total, name) => form.BeginInvoke(() =>
-            {
-                bar.Maximum = Math.Max(1, total);
-                bar.Value = Math.Min(done, bar.Maximum);
-                label.Text = Text.T($"Reading your replays… {done}/{total}", $"Leyendo tus repeticiones… {done}/{total}");
-            })));
-            form.Close();
-        };
-        form.ShowDialog();
-    }
+    [DllImport("user32.dll")] private static extern bool AllowSetForegroundWindow(int processId);
 }

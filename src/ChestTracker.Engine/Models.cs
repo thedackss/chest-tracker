@@ -64,6 +64,8 @@ public sealed class MatchRecord
 public sealed class Settings
 {
     public string? Language { get; set; }
+    /// <summary>Window theme: "system" (follows Windows), "dark" or "light".</summary>
+    public string Theme { get; set; } = "system";
     public string DemosFolder { get; set; } = DefaultDemosFolder;
 
     /// <summary>Chests opened before tracking started (e.g. the in-game quest value), added to both totals.</summary>

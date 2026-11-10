@@ -1,7 +1,9 @@
+using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Drawing.Text;
 using System.Runtime.InteropServices;
+using System.Windows.Forms;
 using L = ChestTracker.Text;
 
 namespace ChestTracker;

@@ -1,0 +1,82 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ui="using:ChestTracker.Ui"
+             x:Class="ChestTracker.Ui.OverviewPage">
+  <Grid RowDefinitions="Auto,Auto,*" RowSpacing="16">
+    <Grid ColumnDefinitions="1.35*,*" ColumnSpacing="16">
+      <Border Classes="card" Padding="20,18">
+        <StackPanel Orientation="Horizontal" Spacing="18">
+          <ui:ChestIcon Width="64" Height="56" />
+          <StackPanel VerticalAlignment="Center">
+            <TextBlock x:Name="QuestText" Classes="big" />
+            <TextBlock Classes="muted" Text="{ui:Tr '“Open treasure chests” quest', 'Misión “Abre cofres de tesoro”'}" />
+          </StackPanel>
+        </StackPanel>
+      </Border>
+      <Border Grid.Column="1" Classes="card" Padding="18,14">
+        <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="*,Auto" RowSpacing="6" VerticalAlignment="Center">
+          <TextBlock Classes="muted" VerticalAlignment="Center" Text="{ui:Tr 'Total (incl. broken)', 'Total (con rotos)'}" />
+          <TextBlock Grid.Column="1" x:Name="TotalText" Classes="num" FontSize="20" />
+          <TextBlock Grid.Row="1" x:Name="TodayLabel" Classes="muted" VerticalAlignment="Center" />
+          <TextBlock Grid.Row="1" Grid.Column="1" x:Name="TodayText" Classes="num" FontSize="20" />
+          <TextBlock Grid.Row="2" Classes="muted" VerticalAlignment="Center" Text="{ui:Tr 'Last match', 'Última partida'}" />
+          <TextBlock Grid.Row="2" Grid.Column="1" x:Name="LastText" Classes="num" FontSize="20" />
+        </Grid>
+      </Border>
+    </Grid>
+
+    <Grid Grid.Row="1" ColumnDefinitions="*,*,*,*" ColumnSpacing="12">
+      <Border Classes="card" Padding="14,12">
+        <StackPanel>
+          <TextBlock x:Name="MatchesText" Classes="num" FontSize="26" />
+          <TextBlock Classes="muted" Text="{ui:Tr 'matches tracked', 'partidas registradas'}" />
+        </StackPanel>
+      </Border>
+      <Border Grid.Column="1" Classes="card" Padding="14,12">
+        <StackPanel>
+          <TextBlock x:Name="AverageText" Classes="num" FontSize="26" />
+          <TextBlock Classes="muted" Text="{ui:Tr 'chests per match', 'cofres por partida'}" />
+        </StackPanel>
+      </Border>
+      <Border Grid.Column="2" Classes="card" Padding="14,12">
+        <StackPanel>
+          <TextBlock x:Name="BestText" Classes="num" FontSize="26" />
+          <TextBlock Classes="muted" Text="{ui:Tr 'best match', 'mejor partida'}" />
+        </StackPanel>
+      </Border>
+      <Border Grid.Column="3" Classes="card" Padding="14,12">
+        <StackPanel>
+          <TextBlock x:Name="TreasuresText" Classes="num star" FontSize="26" />
+          <TextBlock Classes="muted" Text="{ui:Tr treasures, tesoros}" />
+        </StackPanel>
+      </Border>
+    </Grid>
+
+    <Grid Grid.Row="2" ColumnDefinitions="1.35*,*" ColumnSpacing="16">
+      <Border Classes="card" Padding="16,14">
+        <DockPanel>
+          <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto" Margin="0,0,0,10">
+            <TextBlock Classes="h3" VerticalAlignment="Center" Text="{ui:Tr 'Chests per day', 'Cofres por día', Upper=True}" />
+            <Border Grid.Column="1" Classes="seg">
+              <StackPanel Orientation="Horizontal" Spacing="2">
+                <RadioButton x:Name="Range7" Theme="{StaticResource CtSegment}" GroupName="range" Content="{ui:Tr '7 d', '7 d'}" />
+                <RadioButton x:Name="Range30" Theme="{StaticResource CtSegment}" GroupName="range" Content="{ui:Tr '30 d', '30 d'}" IsChecked="True" />
+                <RadioButton x:Name="RangeAll" Theme="{StaticResource CtSegment}" GroupName="range" Content="{ui:Tr All, Todo}" />
+              </StackPanel>
+            </Border>
+          </Grid>
+          <ui:BarChart x:Name="Chart" HighlightLast="True" MinHeight="120" />
+        </DockPanel>
+      </Border>
+      <Border Grid.Column="1" Classes="card" Padding="16,14">
+        <DockPanel>
+          <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto" Margin="0,0,0,6">
+            <TextBlock Classes="h3" VerticalAlignment="Center" Text="{ui:Tr 'Recent matches', 'Partidas recientes', Upper=True}" />
+            <Button Grid.Column="1" x:Name="SeeAllButton" Classes="link" Content="{ui:Tr 'See all', 'Ver todas'}" />
+          </Grid>
+          <StackPanel x:Name="RecentList" />
+        </DockPanel>
+      </Border>
+    </Grid>
+  </Grid>
+</UserControl>

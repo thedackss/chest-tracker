@@ -41,3 +41,17 @@ License: `lib/LICENSE-FortniteReplayDecompressor` (MIT, Copyright (c) 2020-2026 
 ## Ooz / OozSharp
 
 `lib/OozSharp`: C# version of [ooz](https://github.com/powzix/ooz) by powzix, converted for Fortnite by [SL-x-TnT](https://github.com/SL-x-TnT).
+
+## Libraries in ChestTracker.exe (NuGet packages)
+
+The windows are built with these libraries, included in the exe:
+
+| Library | License | Copyright |
+|---|---|---|
+| [Avalonia](https://github.com/AvaloniaUI/Avalonia) (Avalonia, Avalonia.Win32, Avalonia.Skia, Avalonia.HarfBuzz, Avalonia.Themes.Fluent, Avalonia.Remote.Protocol) | MIT | The AvaloniaUI Project |
+| [MicroCom.Runtime](https://github.com/kekekeks/MicroCom) | MIT | Nikita Tsukanov |
+| [SkiaSharp](https://github.com/mono/SkiaSharp), [HarfBuzzSharp](https://github.com/mono/SkiaSharp) | MIT | Microsoft Corporation |
+| [Skia](https://skia.org) (native, inside libSkiaSharp) | BSD-3-Clause | Google LLC |
+| [HarfBuzz](https://github.com/harfbuzz/harfbuzz) (native, inside libHarfBuzzSharp) | MIT ("Old MIT") | HarfBuzz contributors |
+
+The license texts are in each package (NuGet) and project repository linked above.

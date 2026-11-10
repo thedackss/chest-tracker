@@ -8,7 +8,7 @@
     <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
     <RootNamespace>ChestTracker</RootNamespace>
     <AssemblyName>ChestTracker</AssemblyName>
-    <Version>0.1.0</Version>
+    <Version>0.2.0</Version>
     <Product>chest-tracker</Product>
     <!-- ProductVersion = plain version (no "+commit"), which the signing policy checks. -->
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
@@ -16,10 +16,36 @@
     <!-- The replay parser discovers its types by reflection: never trim. -->
     <PublishTrimmed>false</PublishTrimmed>
     <ServerGarbageCollection>false</ServerGarbageCollection>
+    <!-- Views take the app in their constructor: they are never loaded by URI. -->
+    <NoWarn>$(NoWarn);AVLN3001</NoWarn>
     <ConcurrentGarbageCollection>false</ConcurrentGarbageCollection>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\ChestTracker.Engine\ChestTracker.Engine.csproj" />
     <EmbeddedResource Include="Assets\app.ico" LogicalName="app.ico" />
+  </ItemGroup>
+  <!-- WinForms files say "using System.Drawing/System.Windows.Forms" themselves: those names clash with Avalonia's. -->
+  <ItemGroup>
+    <Using Remove="System.Drawing" />
+    <Using Remove="System.Windows.Forms" />
+  </ItemGroup>
+  <!-- Windows (Avalonia), started on first use inside the WinForms tray app. The overlay stays a native layered window. -->
+  <!-- Skia/HarfBuzz ship ~100 MB of native .pdb files: keep them out of dist/. -->
+  <Target Name="DropNativePdbs" AfterTargets="ComputeResolvedFilesToPublishList">
+    <ItemGroup>
+      <ResolvedFileToPublish Remove="@(ResolvedFileToPublish)" Condition="'%(Extension)' == '.pdb'" />
+    </ItemGroup>
+  </Target>
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="12.1.6" />
+    <!-- Windows backend only (Avalonia.Desktop would add the Linux and macOS ones). -->
+    <PackageReference Include="Avalonia.Win32" Version="12.1.6" />
+    <PackageReference Include="Avalonia.Skia" Version="12.1.6" />
+    <PackageReference Include="Avalonia.HarfBuzz" Version="12.1.6" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="12.1.6" />
+    <!-- Windows render on the CPU (UiHost): no GPU use next to the game, so the ANGLE GPU renderer is left out. -->
+    <PackageReference Include="Avalonia.Angle.Windows.Natives" Version="2.1.27548.20260419" ExcludeAssets="all" />
+    <!-- Avalonia's build-time usage statistics: off. -->
+    <PackageReference Include="Avalonia.BuildServices" Version="11.3.2" ExcludeAssets="all" />
   </ItemGroup>
 </Project>

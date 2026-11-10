@@ -1,0 +1,56 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="ChestTracker.Ui.ChestIcon">
+  <!-- The Classic chest, 64×56 units: same drawing as ChestArt.cs and design/mockups.html. -->
+  <UserControl.Resources>
+    <LinearGradientBrush x:Key="GoldFill" StartPoint="0%,0%" EndPoint="0%,100%">
+      <GradientStop Offset="0" Color="#ffe489" />
+      <GradientStop Offset="0.55" Color="#ffcd46" />
+      <GradientStop Offset="1" Color="#d9961c" />
+    </LinearGradientBrush>
+    <SolidColorBrush x:Key="Ink" Color="#1c140c" />
+  </UserControl.Resources>
+  <Viewbox Stretch="Uniform">
+    <Canvas Width="64" Height="56">
+      <Path Data="M9 24H55A3 3 0 0 1 58 27V49A3 3 0 0 1 55 52H9A3 3 0 0 1 6 49V27A3 3 0 0 1 9 24Z">
+        <Path.Fill>
+          <LinearGradientBrush StartPoint="0%,0%" EndPoint="0%,100%">
+            <GradientStop Offset="0" Color="#94582a" />
+            <GradientStop Offset="1" Color="#6e3f1d" />
+          </LinearGradientBrush>
+        </Path.Fill>
+      </Path>
+      <Path Data="M6 24V18C6 10 14.67 6 32 6C49.33 6 58 10 58 18V24Z">
+        <Path.Fill>
+          <LinearGradientBrush StartPoint="0%,0%" EndPoint="0%,100%">
+            <GradientStop Offset="0" Color="#c07c3c" />
+            <GradientStop Offset="1" Color="#8f5427" />
+          </LinearGradientBrush>
+        </Path.Fill>
+      </Path>
+      <Canvas Width="64" Height="56"
+              Clip="M6 24V18C6 10 14.67 6 32 6C49.33 6 58 10 58 18V24Z M9 24H55A3 3 0 0 1 58 27V49A3 3 0 0 1 55 52H9A3 3 0 0 1 6 49V27A3 3 0 0 1 9 24Z">
+        <Path Data="M6 38H58" Stroke="#5a3216" StrokeThickness="2" />
+        <Path Data="M6 15H58" Stroke="#b47a4520" StrokeThickness="1.5" />
+        <Path Data="M12 0H20V56H12Z M44 0H52V56H44Z">
+          <Path.Fill>
+            <LinearGradientBrush StartPoint="0%,0%" EndPoint="0%,100%">
+              <GradientStop Offset="0" Color="#f0b43a" />
+              <GradientStop Offset="1" Color="#c47f12" />
+            </LinearGradientBrush>
+          </Path.Fill>
+        </Path>
+      </Canvas>
+      <Path Data="M5.5 21H58.5A1.5 1.5 0 0 1 60 22.5V25.5A1.5 1.5 0 0 1 58.5 27H5.5A1.5 1.5 0 0 1 4 25.5V22.5A1.5 1.5 0 0 1 5.5 21Z"
+            Fill="{StaticResource GoldFill}" Stroke="{StaticResource Ink}" StrokeThickness="2.5" />
+      <Path Data="M6 24V18C6 10 14.67 6 32 6C49.33 6 58 10 58 18V24"
+            Stroke="{StaticResource Ink}" StrokeThickness="3" StrokeJoin="Round" />
+      <Path Data="M9 27H55A3 3 0 0 1 58 30V49A3 3 0 0 1 55 52H9A3 3 0 0 1 6 49V30A3 3 0 0 1 9 27Z"
+            Stroke="{StaticResource Ink}" StrokeThickness="3" />
+      <Path Data="M28 22H36A2 2 0 0 1 38 24V34A2 2 0 0 1 36 36H28A2 2 0 0 1 26 34V24A2 2 0 0 1 28 22Z"
+            Fill="{StaticResource GoldFill}" Stroke="{StaticResource Ink}" StrokeThickness="2.5" />
+      <Ellipse Canvas.Left="29.8" Canvas.Top="25.8" Width="4.4" Height="4.4" Fill="{StaticResource Ink}" />
+      <Rectangle Canvas.Left="31" Canvas.Top="28" Width="2" Height="5" Fill="{StaticResource Ink}" />
+    </Canvas>
+  </Viewbox>
+</UserControl>

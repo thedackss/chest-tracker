@@ -1,8 +1,10 @@
+using System.Drawing;
 using System.Drawing.Imaging;
+using ChestTracker.Ui;
 
 namespace ChestTracker;
 
-/// <summary>--preview: renders the overlay states and the settings window to PNG files (for checking the UI).</summary>
+/// <summary>--preview: renders the overlay states, the chest and every window (dark and light) to PNG files.</summary>
 public static class Preview
 {
     public static void Save(Store store, Settings settings, string folder)
@@ -13,7 +15,8 @@ public static class Preview
         {
             new Tracker(store, settings, data).Scan(ignoreQuietPeriod: true);
         }
-        var totals = Totals.From(data, settings, data.Matches.Count > 0 ? data.Matches[^1].When.AddMinutes(-90) : DateTime.UtcNow);
+        var sessionStart = data.Matches.Count > 0 ? data.Matches.Max(m => m.When).AddMinutes(-90) : DateTime.UtcNow;
+        var totals = Totals.From(data, settings, sessionStart);
 
         foreach (var (name, state) in new[]
         {
@@ -54,22 +57,25 @@ public static class Preview
             strip.Save(Path.Combine(folder, "chest.png"), ImageFormat.Png);
         }
 
-        foreach (var welcome in new[] { true, false })
-        {
-            using var form = new SettingsForm(settings, data.Matches.Sum(m => m.QuestChests), welcome)
-            {
-                StartPosition = FormStartPosition.Manual,
-                Location = new Point(-5000, -5000),
-                ShowInTaskbar = false,
-            };
-            form.Show();
-            Application.DoEvents();
-            using var bmp = new Bitmap(form.Width, form.Height);
-            form.DrawToBitmap(bmp, new Rectangle(Point.Empty, form.Size));
-            bmp.Save(Path.Combine(folder, welcome ? "welcome.png" : "settings.png"), ImageFormat.Png);
-            form.Close();
-        }
-
+        UiHost.SavePreviews(new PreviewHost(settings, data, sessionStart), folder);
         File.WriteAllText(Path.Combine(folder, "report.html"), Report.Build(settings, data.Matches, totals));
+    }
+
+    /// <summary>The windows' view of the app, from the data folder: changes are not saved.</summary>
+    private sealed class PreviewHost(Settings settings, TrackerData data, DateTime sessionStartUtc) : IAppHost
+    {
+        public Settings Settings => settings;
+        public Totals Totals => Totals.From(data, settings, sessionStartUtc);
+        public List<MatchRecord> Matches => data.Matches.ToList();
+        public string Status => Text.T("Watching replays", "Vigilando repeticiones");
+        public bool OverlayLocked => true;
+        public event Action? Changed { add { } remove { } }
+        public void SettingsChanged() { }
+        public void ToggleOverlay() { }
+        public void ToggleLock() { }
+        public void ExportReport() { }
+        public void OpenDataFolder() { }
+        public void Quit() { }
+        public byte[] OverlayPng(float scale) => TrayApp.OverlayPng(new OverlayState(Totals, false, true), scale);
     }
 }

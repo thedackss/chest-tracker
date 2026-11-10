@@ -1,7 +1,12 @@
+using System.Drawing;
+using System.Drawing.Imaging;
+using System.Windows.Forms;
+using ChestTracker.Ui;
+
 namespace ChestTracker;
 
-/// <summary>The app: tray icon, background scans, overlay, report and shortcuts.</summary>
-public sealed class TrayApp : ApplicationContext
+/// <summary>The app: tray icon, background scans, overlay, shortcuts. Opens the windows (Ui) on demand.</summary>
+public sealed class TrayApp : ApplicationContext, IAppHost
 {
     private static readonly TimeSpan ScanInterval = TimeSpan.FromSeconds(8);
     private static readonly TimeSpan FinishingInterval = TimeSpan.FromSeconds(2);
@@ -23,17 +28,29 @@ public sealed class TrayApp : ApplicationContext
     private bool _scanning;
     private DateTime _lastScanUtc = DateTime.MinValue;
     private bool _fortniteRunning;
-    private SettingsForm? _settingsForm;
+    private bool _matchInProgress;
+    private string _demosFolder;
 
     public TrayApp(Store store, Settings settings, Tracker tracker)
     {
         _store = store;
         _settings = settings;
         _tracker = tracker;
+        _demosFolder = settings.DemosFolder;
         _ui = SynchronizationContext.Current ?? new WindowsFormsSynchronizationContext();
 
+        // Once: these items move to each rebuilt menu (language change).
+        _overlayItem.Click += (_, _) => ToggleOverlay();
+        _lockItem.Click += (_, _) => ToggleLock();
         _tray = new NotifyIcon { Icon = ChestArt.AppIcon(), Visible = true, ContextMenuStrip = BuildMenu() };
-        _tray.DoubleClick += (_, _) => OpenReport();
+        _tray.MouseClick += (_, e) =>
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                UiHost.ToggleFlyout(this, new Avalonia.PixelPoint(Cursor.Position.X, Cursor.Position.Y));
+            }
+        };
+        _tray.DoubleClick += (_, _) => UiHost.ShowMain(this, Page.Overview);
 
         _overlay.Moved += p =>
         {
@@ -47,23 +64,97 @@ public sealed class TrayApp : ApplicationContext
         _timer.Tick += (_, _) => Tick();
         _timer.Start();
         Refresh();
-        Report.Write(_store, _settings, _tracker.MatchesSnapshot(), Totals());
+        Report.Write(_store, _settings, _tracker.MatchesSnapshot(), Totals);
         Tick();
     }
 
-    private Totals Totals() => _tracker.GetTotals(_sessionStartUtc);
+    // ---- IAppHost (the windows) ----
+
+    public Settings Settings => _settings;
+    public Totals Totals => _tracker.GetTotals(_sessionStartUtc);
+    public List<MatchRecord> Matches => _tracker.MatchesSnapshot();
+    public bool OverlayLocked => _settings.OverlayLocked;
+    public event Action? Changed;
+
+    public string Status =>
+        _tracker.MatchInProgress ? Text.T("Match in progress\nCounted when it ends", "Partida en curso\nSe cuenta al terminar")
+        : _fortniteRunning ? Text.T("Fortnite is running\nWatching replays", "Fortnite está abierto\nVigilando repeticiones")
+        : Text.T("Watching replays", "Vigilando repeticiones")
+          + (Totals.Last is { } last ? "\n" + Text.T("Last match: ", "Última partida: ") + Stats.ShortWhen(last) : "");
+
+    public void SettingsChanged()
+    {
+        var language = Text.Language;
+        Text.Set(_settings.Language);
+        SaveSettings();
+        if (_store.IsDefaultFolder)
+        {
+            Autostart.Apply(_settings.StartWithFortnite);
+        }
+        if (language != Text.Language)
+        {
+            _tray.ContextMenuStrip = BuildMenu();
+        }
+        if (_settings.DemosFolder != _demosFolder)
+        {
+            _demosFolder = _settings.DemosFolder;
+            _lastScanUtc = DateTime.MinValue; // scan the new folder now
+        }
+        Report.Write(_store, _settings, _tracker.MatchesSnapshot(), Totals);
+        Refresh();
+    }
+
+    public void ToggleOverlay()
+    {
+        _settings.ShowOverlay = !_settings.ShowOverlay;
+        SaveSettings();
+        Refresh();
+    }
+
+    public void ToggleLock()
+    {
+        _settings.OverlayLocked = !_settings.OverlayLocked;
+        if (!_settings.ShowOverlay && !_settings.OverlayLocked)
+        {
+            _settings.ShowOverlay = true; // unlocking means "I want to move it"
+        }
+        SaveSettings();
+        Refresh();
+    }
+
+    public void ExportReport()
+    {
+        Report.Write(_store, _settings, _tracker.MatchesSnapshot(), Totals);
+        Open(_store.ReportPath);
+    }
+
+    public void OpenDataFolder() => Open(_store.Folder);
+
+    public void Quit() => ExitThread();
+
+    public byte[] OverlayPng(float scale) =>
+        OverlayPng(new OverlayState(Totals, _tracker.MatchInProgress, _settings.OverlayLocked), scale);
+
+    public static byte[] OverlayPng(OverlayState state, float scale)
+    {
+        using var bmp = OverlayForm.Draw(state, scale);
+        using var png = new MemoryStream();
+        bmp.Save(png, ImageFormat.Png);
+        return png.ToArray();
+    }
+
+    // ---- tray ----
 
     private ContextMenuStrip BuildMenu()
     {
         var menu = new ContextMenuStrip();
-        _overlayItem.Click += (_, _) => ToggleOverlay();
-        _lockItem.Click += (_, _) => ToggleLock();
         menu.Items.Add(_header);
         menu.Items.Add(new ToolStripSeparator());
+        var open = menu.Items.Add(Text.T("Open chest-tracker", "Abrir chest-tracker"), null, (_, _) => UiHost.ShowMain(this, Page.Overview));
+        open.Font = new Font(open.Font, FontStyle.Bold);
         menu.Items.Add(_overlayItem);
         menu.Items.Add(_lockItem);
-        menu.Items.Add(Text.T("Open report", "Abrir informe"), null, (_, _) => OpenReport());
-        menu.Items.Add(Text.T("Settings…", "Ajustes…"), null, (_, _) => ShowSettings());
+        menu.Items.Add(Text.T("Settings…", "Ajustes…"), null, (_, _) => UiHost.ShowMain(this, Page.Settings));
         menu.Items.Add(new ToolStripSeparator());
         menu.Items.Add(Text.T("Quit", "Salir"), null, (_, _) => ExitThread());
         return menu;
@@ -71,7 +162,13 @@ public sealed class TrayApp : ApplicationContext
 
     private void Tick()
     {
-        _fortniteRunning = Fortnite.IsRunning();
+        var running = Fortnite.IsRunning();
+        if (running != _fortniteRunning || _tracker.MatchInProgress != _matchInProgress)
+        {
+            _fortniteRunning = running;
+            _matchInProgress = _tracker.MatchInProgress;
+            Changed?.Invoke(); // status line, overlay preview
+        }
         var interval = _tracker.Finishing ? FinishingInterval : ScanInterval;
         if (!_scanning && DateTime.UtcNow - _lastScanUtc >= interval)
         {
@@ -98,7 +195,7 @@ public sealed class TrayApp : ApplicationContext
         _lastScanUtc = DateTime.UtcNow;
         if (result.Added.Count > 0)
         {
-            var totals = Totals();
+            var totals = Totals;
             Report.Write(_store, _settings, _tracker.MatchesSnapshot(), totals);
             if (result.Added.Count == 1)
             {
@@ -116,7 +213,10 @@ public sealed class TrayApp : ApplicationContext
         {
             Notify(Text.T("A replay could not be read", "No se pudo leer una repetición"), string.Join("\n", result.Errors.Take(2)));
         }
-        Refresh();
+        if (result.Added.Count > 0)
+        {
+            Refresh();
+        }
     }
 
     private void Notify(string title, string text)
@@ -126,10 +226,10 @@ public sealed class TrayApp : ApplicationContext
         _tray.ShowBalloonTip(5000);
     }
 
-    /// <summary>Tray tooltip, menu and overlay figures.</summary>
+    /// <summary>Tray tooltip, menu, overlay and open windows.</summary>
     private void Refresh()
     {
-        var t = Totals();
+        var t = Totals;
         var summary = Text.T($"{Text.N(t.Real)} chests · quest {Text.N(t.Quest)}", $"{Text.N(t.Real)} cofres · misión {Text.N(t.Quest)}");
         _header.Text = summary;
         var tip = "chest-tracker · " + summary;
@@ -139,6 +239,7 @@ public sealed class TrayApp : ApplicationContext
         _lockItem.Text = Text.T("Lock overlay\tCtrl+Shift+L", "Fijar overlay\tCtrl+Shift+L");
         _lockItem.Checked = _settings.OverlayLocked;
         UpdateOverlay();
+        Changed?.Invoke();
     }
 
     private void UpdateOverlay()
@@ -149,7 +250,7 @@ public sealed class TrayApp : ApplicationContext
             if (_overlay.Visible) _overlay.Hide();
             return;
         }
-        _overlay.UpdateState(new OverlayState(Totals(), _tracker.MatchInProgress, _settings.OverlayLocked), _settings.OverlaySize);
+        _overlay.UpdateState(new OverlayState(Totals, _tracker.MatchInProgress, _settings.OverlayLocked), _settings.OverlaySize);
         if (!_overlay.Visible)
         {
             _overlay.Location = OverlayPosition();
@@ -169,71 +270,16 @@ public sealed class TrayApp : ApplicationContext
         return new Point(area.Right - _overlay.Width - (int)(area.Width * 0.01), area.Top + (int)(area.Height * 0.30));
     }
 
-    private void ToggleOverlay()
+    private void Open(string path)
     {
-        _settings.ShowOverlay = !_settings.ShowOverlay;
-        SaveSettings();
-        Refresh();
-    }
-
-    private void ToggleLock()
-    {
-        _settings.OverlayLocked = !_settings.OverlayLocked;
-        if (!_settings.ShowOverlay && !_settings.OverlayLocked)
-        {
-            _settings.ShowOverlay = true; // unlocking means "I want to move it"
-        }
-        SaveSettings();
-        Refresh();
-    }
-
-    private void OpenReport()
-    {
-        Report.Write(_store, _settings, _tracker.MatchesSnapshot(), Totals());
         try
         {
-            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(_store.ReportPath) { UseShellExecute = true })?.Dispose();
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(path) { UseShellExecute = true })?.Dispose();
         }
         catch (Exception e)
         {
-            _store.Log("Could not open the report", e);
+            _store.Log($"Could not open {path}", e);
         }
-    }
-
-    public void ShowSettings()
-    {
-        if (_settingsForm is { IsDisposed: false })
-        {
-            _settingsForm.Activate();
-            return;
-        }
-        var questFromReplays = _tracker.MatchesSnapshot().Sum(m => m.QuestChests);
-        _settingsForm = new SettingsForm(_settings, questFromReplays, welcome: false);
-        _settingsForm.FormClosed += (_, _) =>
-        {
-            if (_settingsForm.DialogResult == DialogResult.OK)
-            {
-                ApplySettings();
-            }
-            _settingsForm = null;
-        };
-        _settingsForm.Show();
-        _settingsForm.Activate();
-    }
-
-    private void ApplySettings()
-    {
-        var language = Text.Language;
-        Text.Set(_settings.Language);
-        SaveSettings();
-        Autostart.Apply(_settings.StartWithFortnite);
-        if (language != Text.Language)
-        {
-            _tray.ContextMenuStrip = BuildMenu();
-        }
-        _lastScanUtc = DateTime.MinValue; // replays folder may have changed
-        Report.Write(_store, _settings, _tracker.MatchesSnapshot(), Totals());
-        Refresh();
     }
 
     private void SaveSettings()
@@ -248,13 +294,14 @@ public sealed class TrayApp : ApplicationContext
         }
     }
 
-    /// <summary>Another launch of the exe: show the settings of this one.</summary>
-    public void OnSecondInstance() => _ui.Post(_ => ShowSettings(), null);
+    /// <summary>Another launch of the exe: show this one's window.</summary>
+    public void OnSecondInstance() => _ui.Post(_ => UiHost.ShowMain(this, Page.Overview), null);
 
     protected override void ExitThreadCore()
     {
         _timer.Stop();
         _hotkeys.Dispose();
+        UiHost.CloseAll();
         _tray.Visible = false;
         _tray.Dispose();
         _overlay.Close();

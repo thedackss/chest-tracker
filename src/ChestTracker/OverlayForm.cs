@@ -32,7 +32,8 @@ public sealed class OverlayForm : Form
         FormBorderStyle = FormBorderStyle.None;
         ShowInTaskbar = false;
         StartPosition = FormStartPosition.Manual;
-        TopMost = true;
+        // Topmost comes from WS_EX_TOPMOST in CreateParams. Form.TopMost would also call SetWindowPos when the window
+        // is created, which takes the focus from the active window (the tray panel, or the game).
     }
 
     protected override CreateParams CreateParams

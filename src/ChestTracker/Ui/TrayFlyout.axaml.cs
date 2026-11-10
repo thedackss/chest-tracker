@@ -70,7 +70,9 @@ public sealed partial class TrayFlyout : Window
         var t = _app.Totals;
         var today = Stats.Today(_app.Matches);
         QuestText.Text = L.N(t.Quest);
-        SubText.Text = L.T($"quest · {L.N(t.Real)} total", $"misión · {L.N(t.Real)} en total");
+        SubText.Text = t.QuestComplete
+            ? L.T($"opened · {L.N(t.Real)} total", $"abiertos · {L.N(t.Real)} en total")
+            : L.T($"quest · {L.N(t.Real)} total", $"misión · {L.N(t.Real)} en total");
         LastText.Text = t.Last != null ? "+" + L.N(t.Last.ChestsTotal) : "—";
         TodayText.Text = L.N(today.Sum(m => m.ChestsTotal));
         TreasuresText.Text = "★ " + L.N(t.Treasures);

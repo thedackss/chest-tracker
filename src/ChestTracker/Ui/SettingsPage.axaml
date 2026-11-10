@@ -51,7 +51,7 @@
           <StackPanel>
             <Grid Classes="srow" ColumnDefinitions="*,Auto">
               <StackPanel>
-                <TextBlock TextWrapping="Wrap" Text="{ui:Tr 'Your “Open treasure chests” quest is at', 'Tu misión “Abre cofres de tesoro” va en'}" />
+                <TextBlock TextWrapping="Wrap" Text="{ui:Tr 'Chests opened (what the quest counts)', 'Cofres abiertos (lo que cuenta la misión)'}" />
                 <TextBlock x:Name="QuestInfo" Classes="small" TextWrapping="Wrap" />
               </StackPanel>
               <NumericUpDown Grid.Column="1" x:Name="QuestBox" Width="140" Minimum="0" Maximum="1000000" Increment="1"

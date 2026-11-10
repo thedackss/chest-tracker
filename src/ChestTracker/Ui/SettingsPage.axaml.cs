@@ -129,10 +129,14 @@ public sealed partial class SettingsPage : UserControl
     private void UpdateQuestInfo()
     {
         var tracked = QuestFromReplays;
-        var start = (int)(QuestBox.Value ?? 0) - tracked;
-        QuestInfo.Text = start >= 0
-            ? L.T($"{L.N(tracked)} from replays + {L.N(start)} from before", $"{L.N(tracked)} de repeticiones + {L.N(start)} de antes")
-            : L.T($"Lower than the {L.N(tracked)} already counted from replays", $"Menos que los {L.N(tracked)} ya contados de repeticiones");
+        var value = (int)(QuestBox.Value ?? 0);
+        var start = value - tracked;
+        QuestInfo.Text = start < 0
+            ? L.T($"Lower than the {L.N(tracked)} already counted from replays", $"Menos que los {L.N(tracked)} ya contados de repeticiones")
+            : L.T($"{L.N(tracked)} from replays + {L.N(start)} from before tracking", $"{L.N(tracked)} de repeticiones + {L.N(start)} de antes del registro")
+              + (value >= Totals.QuestGoal
+                  ? L.T($"\nThe in-game quest stops at {L.N(Totals.QuestGoal)}; this keeps counting.", $"\nLa misión del juego se detiene en {L.N(Totals.QuestGoal)}; esto sigue contando.")
+                  : "");
     }
 
     private void UpdateFolderInfo()

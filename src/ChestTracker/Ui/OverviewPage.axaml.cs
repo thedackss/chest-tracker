@@ -34,6 +34,7 @@ public sealed partial class OverviewPage : UserControl
         var tracked = matches.Sum(m => m.ChestsTotal);
 
         QuestText.Text = L.N(t.Quest);
+        QuestLabel.Text = Stats.QuestLabel(t);
         TotalText.Text = L.N(t.Real);
         TodayLabel.Text = L.T($"Today · {L.Matches(today.Count)}", $"Hoy · {L.Matches(today.Count)}");
         TodayText.Text = L.N(today.Sum(m => m.ChestsTotal));

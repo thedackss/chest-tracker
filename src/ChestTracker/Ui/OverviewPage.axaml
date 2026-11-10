@@ -9,7 +9,7 @@
           <ui:ChestIcon Width="64" Height="56" />
           <StackPanel VerticalAlignment="Center">
             <TextBlock x:Name="QuestText" Classes="big" />
-            <TextBlock Classes="muted" Text="{ui:Tr '“Open treasure chests” quest', 'Misión “Abre cofres de tesoro”'}" />
+            <TextBlock x:Name="QuestLabel" Classes="muted" />
           </StackPanel>
         </StackPanel>
       </Border>

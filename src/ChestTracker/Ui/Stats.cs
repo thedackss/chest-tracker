@@ -5,6 +5,11 @@ namespace ChestTracker.Ui;
 /// <summary>Figures the windows show, computed from the match history.</summary>
 public static class Stats
 {
+    /// <summary>What the quest count is called: the quest while it runs, then just chests opened (the game stops at 1,000).</summary>
+    public static string QuestLabel(Totals t) => t.QuestComplete
+        ? L.T("chests opened · quest complete ✓", "cofres abiertos · misión completa ✓")
+        : L.T("“Open treasure chests” quest", "Misión “Abre cofres de tesoro”");
+
     public static List<MatchRecord> Today(List<MatchRecord> matches) =>
         matches.Where(m => m.When.ToLocalTime().Date == DateTime.Now.Date).ToList();
 

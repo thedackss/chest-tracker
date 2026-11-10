@@ -9,17 +9,24 @@ public static class Program
     //   --background  started with Windows: no welcome screen, just the tray
     //   --data        another data folder (testing)
     //   --preview     saves overlay and settings screenshots to <folder>, then quits
+    //   --make-icon   writes the app icon (.ico) to <file>, then quits (tools/make-icon.ps1)
     [STAThread]
     public static int Main(string[] args)
     {
-        string? dataDir = null, previewDir = null;
+        string? dataDir = null, previewDir = null, iconFile = null;
         for (var i = 0; i < args.Length; i++)
         {
             switch (args[i])
             {
                 case "--data" when i + 1 < args.Length: dataDir = args[++i]; break;
                 case "--preview" when i + 1 < args.Length: previewDir = args[++i]; break;
+                case "--make-icon" when i + 1 < args.Length: iconFile = args[++i]; break;
             }
+        }
+        if (iconFile != null)
+        {
+            ChestArt.WriteIcon(iconFile);
+            return 0;
         }
 
         ApplicationConfiguration.Initialize();

@@ -33,6 +33,27 @@ public static class Preview
             shot.Save(Path.Combine(folder, name + ".png"), ImageFormat.Png);
         }
 
+        // The chest at icon sizes, on dark and light.
+        int[] chestSizes = { 16, 24, 32, 48, 64, 128 };
+        using (var strip = new Bitmap(chestSizes.Sum() + 10 * (chestSizes.Length + 1), 2 * (128 + 20)))
+        using (var g = Graphics.FromImage(strip))
+        {
+            g.Clear(Color.FromArgb(15, 17, 23));
+            using (var light = new SolidBrush(Color.FromArgb(245, 246, 248)))
+            {
+                g.FillRectangle(light, 0, 148, strip.Width, 148);
+            }
+            var x = 10;
+            foreach (var s in chestSizes)
+            {
+                using var chest = ChestArt.Render(s);
+                g.DrawImageUnscaled(chest, x, 138 - s);
+                g.DrawImageUnscaled(chest, x, 286 - s);
+                x += s + 10;
+            }
+            strip.Save(Path.Combine(folder, "chest.png"), ImageFormat.Png);
+        }
+
         foreach (var welcome in new[] { true, false })
         {
             using var form = new SettingsForm(settings, data.Matches.Sum(m => m.QuestChests), welcome)

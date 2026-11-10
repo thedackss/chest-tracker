@@ -18,9 +18,6 @@ public sealed class TrayApp : ApplicationContext, IAppHost
     private readonly SynchronizationContext _ui;
 
     private readonly NotifyIcon _tray;
-    private readonly ToolStripMenuItem _header = new() { Enabled = false };
-    private readonly ToolStripMenuItem _overlayItem = new();
-    private readonly ToolStripMenuItem _lockItem = new();
     private readonly System.Windows.Forms.Timer _timer = new() { Interval = 2000 };
     private readonly OverlayForm _overlay = new();
     private readonly Hotkeys _hotkeys = new();
@@ -40,14 +37,13 @@ public sealed class TrayApp : ApplicationContext, IAppHost
         _demosFolder = settings.DemosFolder;
         _ui = SynchronizationContext.Current ?? new WindowsFormsSynchronizationContext();
 
-        // Once: these items move to each rebuilt menu (language change).
-        _overlayItem.Click += (_, _) => ToggleOverlay();
-        _lockItem.Click += (_, _) => ToggleLock();
-        _tray = new NotifyIcon { Icon = ChestArt.AppIcon(), Visible = true, ContextMenuStrip = BuildMenu() };
-        _tray.MouseClick += (_, e) =>
+        _tray = new NotifyIcon { Icon = ChestArt.AppIcon(), Visible = true };
+        // Left or right click: the panel. MouseUp, not MouseClick: in the Windows 11 hidden icons popup the button
+        // press doesn't always reach the icon, and MouseClick then never fires.
+        _tray.MouseUp += (_, e) =>
         {
             // A click on one of our notifications can arrive as a click on the icon too: that one opens the window.
-            if (e.Button == MouseButtons.Left && DateTime.UtcNow - _balloonClickedUtc > TimeSpan.FromSeconds(1))
+            if (e.Button is MouseButtons.Left or MouseButtons.Right && DateTime.UtcNow - _balloonClickedUtc > TimeSpan.FromSeconds(1))
             {
                 UiHost.ToggleFlyout(this, new Avalonia.PixelPoint(Cursor.Position.X, Cursor.Position.Y));
             }
@@ -91,16 +87,11 @@ public sealed class TrayApp : ApplicationContext, IAppHost
 
     public void SettingsChanged()
     {
-        var language = Text.Language;
         Text.Set(_settings.Language);
         SaveSettings();
         if (_store.IsDefaultFolder)
         {
             Autostart.Apply(_settings.StartWithFortnite);
-        }
-        if (language != Text.Language)
-        {
-            _tray.ContextMenuStrip = BuildMenu();
         }
         if (_settings.DemosFolder != _demosFolder)
         {
@@ -151,21 +142,6 @@ public sealed class TrayApp : ApplicationContext, IAppHost
     }
 
     // ---- tray ----
-
-    private ContextMenuStrip BuildMenu()
-    {
-        var menu = new ContextMenuStrip();
-        menu.Items.Add(_header);
-        menu.Items.Add(new ToolStripSeparator());
-        var open = menu.Items.Add(Text.T("Open chest-tracker", "Abrir chest-tracker"), null, (_, _) => UiHost.ShowMain(this, Page.Overview));
-        open.Font = new Font(open.Font, FontStyle.Bold);
-        menu.Items.Add(_overlayItem);
-        menu.Items.Add(_lockItem);
-        menu.Items.Add(Text.T("Settings…", "Ajustes…"), null, (_, _) => UiHost.ShowMain(this, Page.Settings));
-        menu.Items.Add(new ToolStripSeparator());
-        menu.Items.Add(Text.T("Quit", "Salir"), null, (_, _) => ExitThread());
-        return menu;
-    }
 
     private void Tick()
     {
@@ -233,18 +209,13 @@ public sealed class TrayApp : ApplicationContext, IAppHost
         _tray.ShowBalloonTip(5000);
     }
 
-    /// <summary>Tray tooltip, menu, overlay and open windows.</summary>
+    /// <summary>Tray tooltip, overlay and open windows.</summary>
     private void Refresh()
     {
         var t = Totals;
         var summary = Text.T($"{Text.N(t.Real)} chests · quest {Text.N(t.Quest)}", $"{Text.N(t.Real)} cofres · misión {Text.N(t.Quest)}");
-        _header.Text = summary;
         var tip = "chest-tracker · " + summary;
         _tray.Text = tip.Length > 63 ? tip[..63] : tip;
-        _overlayItem.Text = Text.T("Show overlay\tCtrl+Shift+O", "Mostrar overlay\tCtrl+Shift+O");
-        _overlayItem.Checked = _settings.ShowOverlay;
-        _lockItem.Text = Text.T("Lock overlay\tCtrl+Shift+L", "Fijar overlay\tCtrl+Shift+L");
-        _lockItem.Checked = _settings.OverlayLocked;
         UpdateOverlay();
         Changed?.Invoke();
     }

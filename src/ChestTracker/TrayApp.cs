@@ -55,6 +55,17 @@ public sealed class TrayApp : ApplicationContext, IAppHost
         };
         _tray.DoubleClick += (_, _) => UiHost.ShowMain(this, Page.Overview);
 
+        // Get the panel ready so the first click is quick: a few seconds after start (not while the game runs),
+        // or as soon as the mouse is over the icon.
+        _tray.MouseMove += (_, _) => UiHost.WarmUp(this);
+        var warmUp = new System.Windows.Forms.Timer { Interval = 4000 };
+        warmUp.Tick += (_, _) =>
+        {
+            warmUp.Dispose();
+            if (!_fortniteRunning) UiHost.WarmUp(this);
+        };
+        warmUp.Start();
+
         _overlay.Moved += p =>
         {
             _settings.OverlayX = p.X;

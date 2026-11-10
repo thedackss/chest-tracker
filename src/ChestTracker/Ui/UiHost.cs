@@ -31,6 +31,28 @@ public static class UiHost
         ApplyTheme(theme);
     }
 
+    /// <summary>
+    /// Makes the first tray click as quick as the next ones: starts Avalonia and draws the panel once, off screen,
+    /// then gives the memory back. The first open otherwise spends ~0.5 s starting up (mostly compiling code).
+    /// </summary>
+    public static void WarmUp(IAppHost app)
+    {
+        if (_started) return;
+        EnsureStarted(app.Settings.Theme);
+        var panel = new TrayFlyout(app)
+        {
+            ShowActivated = false,
+            WindowStartupLocation = WindowStartupLocation.Manual,
+            Position = new PixelPoint(-30000, -30000),
+        };
+        panel.Opened += (_, _) => Dispatcher.UIThread.Post(() =>
+        {
+            panel.Dismiss();
+            Dispatcher.UIThread.Post(ReleaseMemory, DispatcherPriority.Background);
+        }, DispatcherPriority.Background);
+        panel.Show();
+    }
+
     /// <summary>"dark", "light", or anything else to follow Windows.</summary>
     public static void ApplyTheme(string? theme)
     {

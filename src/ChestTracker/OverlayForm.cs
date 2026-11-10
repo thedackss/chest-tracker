@@ -189,7 +189,9 @@ public sealed class OverlayForm : Form
 
     private static GraphicsPath TextPath(string text, Font font)
     {
-        var path = new GraphicsPath();
+        // Winding fill: Bahnschrift (a variable font) builds glyphs from overlapping pieces. With the default
+        // alternate fill the overlaps stay empty and the black outline shows through (marks in 4, 6, 9, t).
+        var path = new GraphicsPath(FillMode.Winding);
         path.AddString(text, font.FontFamily, (int)font.Style, font.Size, PointF.Empty, StringFormat.GenericTypographic);
         return path;
     }

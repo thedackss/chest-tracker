@@ -58,6 +58,15 @@ public static class Program
             return 0;
         }
 
+        // An error in a window or a tray click goes to errors.log; the tray app keeps counting (no .NET error dialog).
+        Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
+        Application.ThreadException += (_, e) => store.Log("Unexpected error", e.Exception);
+        AppDomain.CurrentDomain.UnhandledException += (_, e) =>
+        {
+            if (e.ExceptionObject is Exception x) store.Log("Crash", x);
+        };
+        Ui.UiHost.Log = store.Log;
+
         var tracker = new Tracker(store, settings, store.LoadData());
         if (firstRun)
         {

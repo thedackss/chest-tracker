@@ -12,23 +12,45 @@ namespace ChestTracker.Ui;
 /// </summary>
 public static class UiHost
 {
-    private static bool _started;
+    private static bool _started, _starting;
     private static MainWindow? _main;
     private static TrayFlyout? _flyout;
     private static DateTime _flyoutClosedUtc;
 
-    public static void EnsureStarted(string? theme)
+    /// <summary>errors.log (set by Program).</summary>
+    public static Action<string, Exception?>? Log { get; set; }
+
+    /// <summary>
+    /// Starts Avalonia once. False while it is still starting: a tray event handled during the start (Windows can
+    /// deliver one while it sets up) must not create a window before the windowing backend is registered.
+    /// </summary>
+    public static bool EnsureStarted(string? theme)
     {
-        if (_started) return;
-        AppBuilder.Configure<UiApp>()
-            .UseWin32()
-            .UseSkia()
-            .UseHarfBuzz()
-            // Software rendering: the windows are simple and mostly still, and no GPU device is created next to the game.
-            .With(new Win32PlatformOptions { RenderingMode = new[] { Win32RenderingMode.Software } })
-            .SetupWithoutStarting();
-        _started = true;
+        if (_started) return true;
+        if (_starting) return false;
+        _starting = true;
+        try
+        {
+            AppBuilder.Configure<UiApp>()
+                .UseWin32()
+                .UseSkia()
+                .UseHarfBuzz()
+                // Software rendering: the windows are simple and mostly still, and no GPU device is created next to the game.
+                .With(new Win32PlatformOptions { RenderingMode = new[] { Win32RenderingMode.Software } })
+                .SetupWithoutStarting();
+            _started = true;
+            Dispatcher.UIThread.UnhandledException += (_, e) =>
+            {
+                Log?.Invoke("Unexpected error in a window", e.Exception);
+                e.Handled = true;
+            };
+        }
+        finally
+        {
+            _starting = false;
+        }
         ApplyTheme(theme);
+        return true;
     }
 
     /// <summary>
@@ -37,8 +59,7 @@ public static class UiHost
     /// </summary>
     public static void WarmUp(IAppHost app)
     {
-        if (_started) return;
-        EnsureStarted(app.Settings.Theme);
+        if (_started || !EnsureStarted(app.Settings.Theme)) return;
         var panel = new TrayFlyout(app)
         {
             ShowActivated = false,
@@ -75,7 +96,7 @@ public static class UiHost
 
     public static void ShowMain(IAppHost app, Page page)
     {
-        EnsureStarted(app.Settings.Theme);
+        if (!EnsureStarted(app.Settings.Theme)) return;
         if (_main == null)
         {
             _main = new MainWindow(app, page);
@@ -97,7 +118,7 @@ public static class UiHost
     /// <summary>Tray icon clicked: opens the flyout by the cursor, or closes it.</summary>
     public static void ToggleFlyout(IAppHost app, PixelPoint cursor)
     {
-        EnsureStarted(app.Settings.Theme);
+        if (!EnsureStarted(app.Settings.Theme)) return;
         if (_flyout is { IsClosed: false })
         {
             _flyout.Dismiss();
